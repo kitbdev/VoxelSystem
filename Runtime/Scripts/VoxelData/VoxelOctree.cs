@@ -1,6 +1,6 @@
 
 namespace VoxelSystem {
     public class VoxelOctree{
-        Octree<Voxel<IVoxelValue,VoxelMaterialData>> octree;
+        Octree<Voxel<System.UInt16>> octree;
     }
 }

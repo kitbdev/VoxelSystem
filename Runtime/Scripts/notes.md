@@ -1,13 +1,80 @@
+# Voxel System
+
+wants
+easy to setup and use
+extendable
+dynamic LOD, GPU accelerated, multithreaded
+editor tools
+runtime modification
+
+small voxel renderer (for single chunk objects)
+voxel world (for up to infinite terrain)
+realtime voxelization? maybe
+
+runtime modifiable and destructable
+custom data on any voxel?
+rigidbody physics?
+
+
+todo
+- [ ] publish online
+  - [ ] remove dependency on Kutil
+  - [ ] paid version?
+  - [ ] lisence
+  - [ ] sample scenes
+  - [ ] tests
+  - [ ] api docs
+- [ ] Voxel World
+  - [ ] Chunk management
+    - [ ] auto load around cameras?
+  - [ ] LODs
+    - [ ] Octtree
+  - [ ] show in editor
+  - [ ] edit tools
+  - [ ] Generators
+    - [ ] simple flat
+    - [ ] node graph?
+    - [ ] scripting api?
+- [ ] Voxel Model
+  - [ ] like world but no chunks
+- [ ] Voxel Data
+  - [ ] stores just an int? uint16? float?
+  - [ ] Materials
+    - [ ] multiple options
+      - [ ] seperate material per face (but batch when not seperate)
+      - [ ] uv position offset
+      - [ ] world uv offset (so a texture can spread across multiple voxels)
+      - [ ] tint?
+      - [ ] seperate layer
+- [ ] mesh generation
+  - [ ] options
+    - [ ] simple cubes
+    - [ ] greedy cubes
+    - [ ] quick greedy cubes
+    - [ ] marching cubes
+  - [ ] non perfect cubes?
+- [ ] collision
+  - [ ] cube or mesh?
+- [ ] save and load
+  - [ ] voxel file format
+  - [ ] compression vs load speed
+  - [ ] import from multiple sources
+- [ ] testing
+  - [ ] performance test
+    - [ ] many voxels
+    - [ ] lots of changes per frame 
+  - [ ] smoke test all features
+- [ ] extra stuff?
+  - [ ] multiplayer
+
+
+
+
+## Voxel Plugin notes
 voxel plugin unity
 port to unity
 have all major features
 and some others
-
-
-todo
-[ ] everything
-
-
 
 Voxel World
 - Preview
@@ -65,21 +132,6 @@ Voxel World
 	- enable, interface, sync rate
 - Bake (to static meshes)
 
-
-wants
-easy to setup and use
-extendable
-dynamic LOD, GPU accelerated, multithreaded
-editor tools
-runtime modification
-
-small voxel renderer (for single chunk objects)
-voxel world (for up to infinite terrain)
-realtime voxelization? maybe
-
-runtime modifiable and destructable
-custom data on any voxel?
-rigidbody physics?
 
 
 

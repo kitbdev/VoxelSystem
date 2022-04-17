@@ -3,6 +3,12 @@ using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
+    // todo make into SO? would need to not store things here, and support creating multiple meshes at a time
+    // ? have more settings
+    // todo operate on voxel volume?
+    /// <summary>
+    /// Provides Meshing functionality for voxels
+    /// </summary>
     [System.Serializable]
     public abstract class VoxelMesherBase {
 

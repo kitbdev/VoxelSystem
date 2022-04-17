@@ -5,6 +5,9 @@ using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
+    /// <summary>
+    /// Slower mesher that uses old unity mesh api
+    /// </summary>
     [System.Serializable]
     public class VoxelSimpleMesher : VoxelMesherBase {
 

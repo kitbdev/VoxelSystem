@@ -3,6 +3,9 @@ using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
+    /// <summary>
+    /// Connects a chunk, a voxel mesher, and a meshfilter together
+    /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class VoxelRenderer : MonoBehaviour {
 

@@ -5,12 +5,16 @@ using UnityEngine;
 
 namespace VoxelSystem {
     public class VoxelWorld : MonoBehaviour {
+
         [Header("Voxel settings")]
         public float voxelSize = 1;
         public int chunkResolution = 16;
         public int octtreeDepth = 16;
         public bool regenerateOnAwake = true;
         public bool saveChunksInScene = false;
+
+        public VoxelGenerator generator;
+
         [Header("Save settings")]
         public bool autoSave = false;
         public Object saveObject;//todo SO?
@@ -36,6 +40,20 @@ namespace VoxelSystem {
         private void OnValidate() {
             // Debug.Log("onval vw");
             mesher.OnValidate();
+        }
+
+        public void FinishedGeneration() {
+            // event?
+        }
+
+        public void StartGeneration() {
+            if (generator == null) {
+                return;
+            }
+            generator.Generate();
+        }
+        public void ClearGen() {
+
         }
     }
 }
