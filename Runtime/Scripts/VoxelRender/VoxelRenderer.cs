@@ -4,17 +4,19 @@ using UnityEngine;
 
 namespace VoxelSystem {
     /// <summary>
-    /// Connects a chunk, a voxel mesher, and a meshfilter together
+    /// Renders a chunk of voxels using a voxel mesher and a meshfilter
     /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class VoxelRenderer : MonoBehaviour {
 
+        [SerializeField, ReadOnly]
+        VoxelWorld world;
         [SerializeField, SerializeReference, ReadOnly]
         VoxelMesherBase voxelMesher;
         [SerializeField, ReadOnly]
         MeshFilter meshFilter;
-        // [SerializeField, ReadOnly]
-        // VoxelChunk chunk;
+        
+        // todo use world octtree
 
         // public void Initialize(VoxelChunk chunk) {
         //     this.chunk = chunk;

@@ -29,6 +29,7 @@ todo
     - [ ] auto load around cameras?
   - [ ] LODs
     - [ ] Octtree
+    - [ ] dynamic?
   - [ ] show in editor
   - [ ] edit tools
   - [ ] Generators
@@ -52,6 +53,8 @@ todo
     - [ ] greedy cubes
     - [ ] quick greedy cubes
     - [ ] marching cubes
+    - [ ] Transvoxel Algorithm
+    - [ ] something with sharp edges?
   - [ ] non perfect cubes?
 - [ ] collision
   - [ ] cube or mesh?
@@ -65,16 +68,32 @@ todo
     - [ ] lots of changes per frame 
   - [ ] smoke test all features
 - [ ] extra stuff?
+  - [ ] navmesh
+  - [ ] non destructive editing - virtualize existing meshes?
+    - [ ] add/remove, smoothness
+  - [ ] water and other liquids
+  - [ ] foliage?
+  - [ ] more importers
+  - [ ] gpu acceleration?
+  - [ ] timing profiling
+  - [ ] physics? seperate voxels come apart and turn into rb
   - [ ] multiplayer
+
+```mermaid
+sequenceDiagram
+participant vw as VoxelWorld
+vw -->> hi: test
+
+```
 
 
 
 
 ## Voxel Plugin notes
-voxel plugin unity
-port to unity
-have all major features
-and some others
+- voxel plugin unity
+- port to unity
+- have all major features
+- and some others
 
 Voxel World
 - Preview

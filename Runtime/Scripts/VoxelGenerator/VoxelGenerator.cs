@@ -5,13 +5,13 @@ namespace VoxelSystem {
     /// Generate Voxels for a world. 
     /// Inherit to provide funcitonality
     /// </summary>
-    [CreateAssetMenu(fileName = "VoxelGenerator", menuName = "VoxelSystem/VoxelGenerator", order = 0)]
+    // [CreateAssetMenu(fileName = "VoxelGenerator", menuName = "VoxelSystem/VoxelGenerator", order = 0)]
     public abstract class VoxelGenerator : ScriptableObject {
 
         protected VoxelWorld voxelWorld;
 
         public abstract void Clear();
-        // todo generate by chunk?
+        // todo generate by chunk? bounds? any instance data allowed?
         public abstract void Generate();
         public abstract void GenerateImmediate();
         // ? how to set voxels

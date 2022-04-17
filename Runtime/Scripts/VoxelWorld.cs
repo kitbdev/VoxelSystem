@@ -4,6 +4,15 @@ using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
+    /*
+    loads from saveobject or generates from generator on enable
+    voxels are discarded on disable?
+    */
+    /// <summary>
+    /// Manages a world of Voxels. manages chunks and LOD. stores octree. starts generator. holds many voxel settings
+    /// </summary>
+    [SelectionBase]
+    [DisallowMultipleComponent]
     public class VoxelWorld : MonoBehaviour {
 
         [Header("Voxel settings")]
@@ -17,11 +26,11 @@ namespace VoxelSystem {
 
         [Header("Save settings")]
         public bool autoSave = false;
-        public Object saveObject;//todo SO?
+        public VoxelsSaveObject saveObject;//todo
         public Object loadBtnObject;//todo 
         // [Header("Generator settings")]
         [Header("Render settings")]
-        public TypeSelector<VoxelMesherBase> mesher = new TypeSelector<VoxelMesherBase>(typeof(VoxelSimpleMesher));
+        // public TypeSelector<VoxelMesherBase> mesher = new TypeSelector<VoxelMesherBase>(typeof(VoxelSimpleMesher));
         [Header("Physics settings")]
         public bool enableCollision = false;
         // todo 
@@ -37,9 +46,12 @@ namespace VoxelSystem {
         public bool hideChunks = true;
         public bool debugEnabled = false;
 
+        public VoxelOctree voxelOctree;
+
+
         private void OnValidate() {
             // Debug.Log("onval vw");
-            mesher.OnValidate();
+            // mesher.OnValidate();
         }
 
         public void FinishedGeneration() {
@@ -52,8 +64,17 @@ namespace VoxelSystem {
             }
             generator.Generate();
         }
+        public void StartGenerationImmediate() {
+            if (generator == null) {
+                return;
+            }
+            generator.GenerateImmediate();
+        }
         public void ClearGen() {
-
+            if (generator == null) {
+                return;
+            }
+            generator.Clear();
         }
     }
 }
