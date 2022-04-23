@@ -19,7 +19,7 @@ namespace VoxelSystem {
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-            SerializedProperty idProp = property.FindPropertyRelative(nameof(VoxelTypeId.id));
+            SerializedProperty idProp = property.FindPropertyRelative(nameof(VoxelTypeId.idName));
             if (property.serializedObject.targetObject is VoxelTypeHolder) {
                 // draw default
                 EditorGUI.PropertyField(position, idProp, label);
@@ -51,7 +51,7 @@ namespace VoxelSystem {
                     // draw dropdown menu for voxel type
 
                     // EditorGUI.LabelField(voxelTypeDropdownRect, "test");
-                    VoxelTypeId selectedId = new VoxelTypeId(idProp.intValue);
+                    VoxelTypeId selectedId = new VoxelTypeId(idProp.stringValue);
                     IVoxelType selectedType;
                     if (typeHolder.HasVoxelTypeId(selectedId)) {
                         selectedType = typeHolder.GetVoxelType(selectedId);
@@ -67,7 +67,7 @@ namespace VoxelSystem {
                             bool isSet = !selectedId.IsValid();
                             string content = "none";
                             dmenu.AddItem(new GUIContent(content), isSet, SetMenuItemEvent, new SetMenuItemEventData() {
-                                value = -1,
+                                value = VoxelTypeId.EMPTY.idName,
                                 property = idProp,
                             });
                         }
@@ -79,7 +79,7 @@ namespace VoxelSystem {
                             bool isSet = selectedId.Equals(optionId);
                             string content = optionType.name;
                             dmenu.AddItem(new GUIContent(content), isSet, SetMenuItemEvent, new SetMenuItemEventData() {
-                                value = optionId.id,
+                                value = optionId.idName,
                                 property = idProp,
                             });
                         }
@@ -113,11 +113,11 @@ namespace VoxelSystem {
         [Serializable]
         class SetMenuItemEventData {
             public SerializedProperty property;
-            public int value;
+            public string value;
         }
         void SetMenuItemEvent(object data) {
             var edata = (SetMenuItemEventData)data;
-            edata.property.intValue = edata.value;
+            edata.property.stringValue = edata.value;
             edata.property.serializedObject.ApplyModifiedProperties();
         }
     }

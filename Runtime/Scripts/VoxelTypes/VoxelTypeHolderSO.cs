@@ -11,10 +11,12 @@ namespace VoxelSystem {
     public abstract class VoxelTypeHolder : ScriptableObject {
 
         public abstract IEnumerable<KeyValuePair<VoxelTypeId, IVoxelType>> GetAllTypes();
+        public abstract bool HasVoxelTypeId(VoxelTypeIdVoxelData id);
         public abstract bool HasVoxelTypeId(VoxelTypeId id);
         public abstract bool HasVoxelType(IVoxelType voxelType);
         public abstract VoxelTypeId GetIdForVoxelType(IVoxelType voxelType);
         public abstract IVoxelType GetVoxelType(VoxelTypeId id);
+        public abstract IVoxelType GetVoxelType(VoxelTypeIdVoxelData id);
     }
     // ?
     // todo prob just remove type constraint and use actual in meshers
@@ -44,7 +46,6 @@ namespace VoxelSystem {
         }
 
         // general
-
 
         public override IEnumerable<KeyValuePair<VoxelTypeId, IVoxelType>> GetAllTypes() {
             return voxelTypeDict.Select(kvp => new KeyValuePair<VoxelTypeId, IVoxelType>(kvp.Key, kvp.Value)).ToArray();
@@ -76,6 +77,26 @@ namespace VoxelSystem {
             return voxelTypeDict[id];
         }
 
+        public override bool HasVoxelTypeId(VoxelTypeIdVoxelData id) {
+            // todo by index? or store with normal typeid
+            return false;
+        }
+        public override IVoxelType GetVoxelType(VoxelTypeIdVoxelData voxelType) {
+            if (!HasVoxelTypeId(voxelType)) {
+                Debug.LogWarning($"VoxelTypeIdVD {voxelType} not found!");
+                return null;
+            }
+            // todo
+            // return voxelTypeDict.First(kp => kp.Value == voxelType).Key;
+            return null;
+        }
+
+        VoxelTypeIdVoxelData UpdateVoxelTypeIdVoxelData(VoxelTypeIdVoxelData id){
+            // todo something like this, when changing representation
+            // but apply to voxel volumes
+            return id;
+        }
+
         // for type editors and loaders
 
         public virtual void ClearVoxelTypes() {
@@ -93,10 +114,13 @@ namespace VoxelSystem {
             UpdateInspectorRepresentation();
         }
         public virtual VoxelTypeId AddVoxelType(VoxelT newVoxType) {
-            VoxelTypeId newId = NewKey();
+            VoxelTypeId newId = new VoxelTypeId(ToIdName(newVoxType.name));
             voxelTypeDict.Add(newId, newVoxType);
             UpdateInspectorRepresentation();
             return newId;
+        }
+        string ToIdName(string displayName) {
+            return displayName.Replace(" ", "_").ToLower().Trim();
         }
         // public struct KeyUpdate{
         //     public VoxelTypeId oldKey;
@@ -106,17 +130,17 @@ namespace VoxelSystem {
 
         // }
 
-        protected VoxelTypeId NewKey() {
-            // get first value not in dict
-            int keyId = 0;
-            while (voxelTypeDict.ContainsKey(new VoxelTypeId(keyId))) {
-                keyId++;
-            }
-            return new VoxelTypeId(keyId);
-        }
+        // protected VoxelTypeId NewKey() {
+        //     // get first value not in dict
+        //     int keyId = 0;
+        //     while (voxelTypeDict.ContainsKey(new VoxelTypeId(keyId))) {
+        //         keyId++;
+        //     }
+        //     return new VoxelTypeId(keyId);
+        // }
 
         private void EnsureEmptyTypeIsAdded() {
-            VoxelTypeId emptyId = new VoxelTypeId(0);
+            VoxelTypeId emptyId = VoxelTypeId.EMPTY;
             // note empty type can be changed from default, but it must be at id 0
             if (!voxelTypeDict.ContainsKey(emptyId)) {
                 voxelTypeDict.Add(emptyId, (VoxelT)(new VoxelT()).GetEmptyType());
@@ -153,6 +177,7 @@ namespace VoxelSystem {
 
 
         // for meshers
+
         public virtual Material[] GetUniqueMaterials(VoxelTypeId[] ids) {
             return voxelTypes.SelectMany(vct => vct.GetAllMats()).Where(m => m != null).Distinct().ToArray();
             // return default;

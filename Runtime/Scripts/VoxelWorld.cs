@@ -46,8 +46,33 @@ namespace VoxelSystem {
         public bool hideChunks = true;
         public bool debugEnabled = false;
 
-        public VoxelOctree voxelOctree;
-        public VoxelTypeId type;
+        [Space]
+        // todo how to determine which voxel type to use here
+        public VoxelOctree<VoxelCubic> voxelOctree;
+        // public VoxelOctree<IVoxel> voxelOctreei;
+        // todo?
+        AllVoxelsHolder holder;
+        class AllVoxelsHolder {
+            // interface?
+        }
+        class CubicVoxelsHolder : AllVoxelsHolder {
+            public VoxelOctree<VoxelCubic> voxelOctree;
+        }
+        class CuboidVoxelsHolder : AllVoxelsHolder {
+            public VoxelOctree<VoxelCuboid> voxelOctree;
+        }
+        // and then user can extend their own holder
+        // and I can set holder to whatever class at runtime
+        // ? but is an interface to voxel octree good enough?
+        // todo connect mesher on an actual chunk to octree first
+
+        public enum VoxType {
+            CUBIC, CUBOID, DENSITY, CUSTOM
+        }
+        public VoxType voxtype;
+        public TypeChoice<IVoxelType> typeToUse;//?
+
+        public VoxelTypeId typetest;
 
 
         private void OnValidate() {

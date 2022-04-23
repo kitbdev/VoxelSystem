@@ -4,14 +4,14 @@ namespace VoxelSystem {
     /// </summary>
     [System.Serializable]
     public struct VoxelDensity : IVoxel {
-        public VoxelTypeId typeId;
+        public VoxelTypeIdVoxelData typeId;
         public float density;
 
-        public VoxelDensity(VoxelTypeId typeId) {
+        public VoxelDensity(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
             this.density = 0f;
         }
-        public void Init(VoxelTypeId typeId) {
+        public void Init(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
         }
 

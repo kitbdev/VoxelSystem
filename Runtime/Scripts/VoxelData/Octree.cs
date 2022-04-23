@@ -9,6 +9,14 @@ namespace VoxelSystem {
         public OctreeParent<TData> root;
         public int maxHeight;//?
         // util stuff?
+
+        // todo
+
+
+        public void Clear() {
+            root.Dispose();
+            root = new OctreeParent<TData>((byte)maxHeight);
+        }
     }
     [System.Serializable]
     public abstract class OctreeNode<TData> : System.IDisposable
@@ -52,6 +60,8 @@ namespace VoxelSystem {
 
         public abstract void Dispose();
     }
+    // todo new() instead of struct? would that even help with having an interface?
+    // todo maybe pass a delegate constructor instead - Func createFunc<TData>
     [System.Serializable]
     public sealed class OctreeLeaf<TData> : OctreeNode<TData> where TData : struct {
 
@@ -63,7 +73,9 @@ namespace VoxelSystem {
         }
 
         public override void Dispose() {
-            // TData.Dispose();
+            if (data is System.IDisposable ddata) {
+                ddata.Dispose();
+            }
         }
     }
     // public class OctreeParent : OctreeNode, System.Collections.IEnumerable {
@@ -118,6 +130,7 @@ namespace VoxelSystem {
             children = new OctreeNode<TData>[8];
             for (int i = 0; i < 8; i++) {
                 if (height == 1) {
+                    // todo sparse octree
                     // make leaf
                     children[i] = new OctreeLeaf<TData>(this, (byte)i);
                 } else {
@@ -131,13 +144,37 @@ namespace VoxelSystem {
             foreach (var child in children) {
                 child.Dispose();
             }
+            children = null;
         }
         public IEnumerator GetEnumerator() {
             return children.GetEnumerator();
         }
 
         int GetChildIndex(int x, int y, int z) {
-            return (x >= pos.x ? 1 : 0) + 2 * (y >= pos.y ? 1 : 0) + 4 * (z >= pos.z ? 1 : 0);
+            // from absolute pos
+            /*
+            bottom-top, back-front, left-right
+            y-z-x order
+            i: xyz
+            0: 000
+            1: 100
+            4: 001
+            5: 101
+            2: 010
+            3: 110
+            6: 011
+            7: 111
+            */
+            return (x >= pos.x ? 1 : 0) + 4 * (y >= pos.y ? 1 : 0) + 2 * (z >= pos.z ? 1 : 0);
+        }
+        Vector3Int GetRelPosFromIndex(byte index) {
+            // gets the relative pos
+            // just get child at the index, it should know its pos
+            // todo test
+            int x = (index) & 1;
+            int z = (index >> 1) & 1;
+            int y = (index >> 2) & 1;
+            return new Vector3Int(x, y, z);
         }
 
         public override void Dispose() {

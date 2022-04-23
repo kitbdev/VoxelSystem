@@ -4,9 +4,9 @@ namespace VoxelSystem {
     /// </summary>
     [System.Serializable]
     public struct VoxelCuboid : IVoxel {
-        public VoxelTypeId typeId;
+        public VoxelTypeIdVoxelData typeId;
         // ?
-        // public GameObject conencted;
+        // public GameObject conencted;// todo also implement idisposable to delete this on destroy?
         //  public VoxelDirFlag facingDir;
         // todo also have rotation direction?
         public enum VoxelDirFlag : byte {
@@ -18,10 +18,10 @@ namespace VoxelSystem {
             ZMax = 0x20
         }
 
-        public VoxelCuboid(VoxelTypeId typeId) {
+        public VoxelCuboid(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
         }
-        public void Init(VoxelTypeId typeId) {
+        public void Init(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
         }
 

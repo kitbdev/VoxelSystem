@@ -15,6 +15,6 @@ namespace VoxelSystem {
     /// Interface for single voxel instance data
     /// </summary>
     public interface IVoxel {
-        void Init(VoxelTypeId typeId);
+        void Init(VoxelTypeIdVoxelData typeId);
     }
 }

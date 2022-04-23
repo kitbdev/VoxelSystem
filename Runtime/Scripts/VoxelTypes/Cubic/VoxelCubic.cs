@@ -6,12 +6,12 @@ namespace VoxelSystem {
     /// </summary>
     [System.Serializable]
     public struct VoxelCubic : IVoxel {
-        public VoxelTypeId typeId;
+        public VoxelTypeIdVoxelData typeId;
 
-        public VoxelCubic(VoxelTypeId typeId) {
+        public VoxelCubic(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
         }
-        public void Init(VoxelTypeId typeId) {
+        public void Init(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
         }
 

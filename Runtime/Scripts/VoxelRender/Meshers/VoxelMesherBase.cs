@@ -3,13 +3,17 @@ using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
-   
+
     // ? have more settings
     // todo operate on voxel volume?
     /// <summary>
     /// Provides Meshing functionality for voxels. meshes an entire chunk at a time. lives on that chunk.
     /// </summary>
-    [System.Serializable]
+    // [System.Serializable]
+    // public abstract class VoxelMesherBase<VoxelTypeT, VoxelT> where VoxelTypeT : IVoxelType, new()
+    //                                                       where VoxelT : struct, IVoxel {
+    // // todo need a generic one?
+    // }
     public abstract class VoxelMesherBase {
 
         // protected VoxelChunk chunk;
@@ -19,7 +23,7 @@ namespace VoxelSystem {
         protected float voxelSize;
         public bool renderNullSides;//? move to mat col?
 
-        // protected VoxelTypeHolderSO typeHolder;// => world?.materialSet;
+        // protected VoxelTypeHolderSOType<VoxelTypeT> typeHolder;// => world?.materialSet;
 
         int lod;
         int step;
@@ -27,7 +31,7 @@ namespace VoxelSystem {
         //RuntimeSettings settings
         //bool isTransitionMesh
         // reference to worlds octree
-        VoxelOctree octree;
+        // VoxelOctree<VoxelT> octree;
         // use cache
 
         // ? optional timing

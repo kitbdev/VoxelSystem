@@ -9,7 +9,7 @@ namespace VoxelSystem {
     /// Slower mesher that uses old unity mesh api
     /// </summary>
     [System.Serializable]
-    public class VoxelSimpleCubicMesher : VoxelMesherBase {
+    public class VoxelSimpleCubicMesher : VoxelMesherBase {//<VoxelCubicType, VoxelCubic>
 
         Vector2 textureUVScale = Vector3.one;// = 16f / 512;
 
