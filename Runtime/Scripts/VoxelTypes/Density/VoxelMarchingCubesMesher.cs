@@ -2,6 +2,11 @@
 using UnityEngine;
 
 namespace VoxelSystem {
+    /// <summary>
+    /// default smooth mesher for density voxels.
+    /// uses new unity mesh api.
+    /// </summary>
+    // todo transvoxel algorithm?
     [System.Serializable]
     public class VoxelMarchingCubesMesher : VoxelMesherBase {
         public override void ClearMesh() {

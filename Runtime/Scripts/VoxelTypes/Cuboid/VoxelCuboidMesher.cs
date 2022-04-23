@@ -1,9 +1,16 @@
-
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
+    /// <summary>
+    /// default cuboid mesher that uses new unity mesh api but does not greedily mesh.
+    /// creates cube mesh, and boxes for non perfect cubes
+    /// </summary>
     [System.Serializable]
-    public class VoxelGreedyMesher : VoxelMesherBase {
+    public class VoxelCuboidMesher : VoxelMesherBase {
         public override void ClearMesh() {
             throw new System.NotImplementedException();
         }

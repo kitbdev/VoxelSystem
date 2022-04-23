@@ -12,9 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cf0b0ac590e66b46a2a53b4150616d1, type: 3}
   m_Name: DefVoxelMaterials
   m_EditorClassIdentifier: 
-  voxelMaterials: []
-  vmats:
-    keys: []
-    values: []
-    editInEditor: 0
-    serializedDict: []
+  voxelMaterials:
+  - hasCubeMesh: 0
+    hasCollision: 0
+    tint: {r: 0, g: 0, b: 0, a: 0}
+    layer:
+      layerValue: 0
+    useWorldPosUV: 0
+    worldUVOffset: {x: 0, y: 0}
+    worldUVScale: {x: 0, y: 0}
+    mat: {fileID: 0}
+    texcoord: {x: 0, y: 0}
+    uvScale: {x: 0, y: 0}
+    splitFaces: 0
+    matUp: {fileID: 0}
+    matDown: {fileID: 0}
+    matFront: {fileID: 0}
+    matBack: {fileID: 0}
+    matRight: {fileID: 0}
+    matLeft: {fileID: 0}
+    texcoordUp: {x: 0, y: 0}
+    texcoordDown: {x: 0, y: 0}
+    texcoordFront: {x: 0, y: 0}
+    texcoordBack: {x: 0, y: 0}
+    texcoordRight: {x: 0, y: 0}
+    texcoordLeft: {x: 0, y: 0}
+  voxelTypeIdTest:
+    matId: 0

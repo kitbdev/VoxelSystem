@@ -1,5 +1,10 @@
 # Voxel System
 
+goal
+create a system that works and use it for a project, expanding on it
+repeat until fully featured?
+later: put on asset store?
+
 wants
 easy to setup and use
 extendable
@@ -15,8 +20,16 @@ runtime modifiable and destructable
 custom data on any voxel?
 rigidbody physics?
 
+todo next
+- store data in octtree
+- world spawn chunk
+- mesher create mesh using octtree
+- world chunk management better
+- voxel direction?
+- save voxels to file
+- load voxels from file
 
-todo
+todo general
 - [ ] publish online
   - [ ] remove dependency on Kutil
   - [ ] paid version?
@@ -67,8 +80,10 @@ todo
     - [ ] many voxels
     - [ ] lots of changes per frame 
   - [ ] smoke test all features
-- [ ] extra stuff?
+- [ ] extra stuff
   - [ ] navmesh
+  - [ ] voxel lighting?
+  - [ ] voxel ambient occlusion
   - [ ] non destructive editing - virtualize existing meshes?
     - [ ] add/remove, smoothness
   - [ ] water and other liquids
@@ -86,7 +101,32 @@ vw -->> hi: test
 
 ```
 
+## resources
 
+voxels
+https://0fps.net/category/programming/voxels/
+https://web.archive.org/web/20170726225835/http://alexstv.com/index.php/category/voxel-tutorial
+https://sites.google.com/site/letsmakeavoxelengine/home
+other voxel systems
+ Voxel Plugin
+https://github.com/BlakkM9/VengineX/tree/master/VengineX/Graphics
+LOD
+https://www.reddit.com/r/VoxelGameDev/comments/u1uqth/my_first_attempt_to_create_an_octree_based_lod/
+SVO
+https://eisenwave.github.io/voxel-compression-docs/svo/svo.html
+https://research.nvidia.com/sites/default/files/pubs/2010-02_Efficient-Sparse-Voxel/laine2010tr1_paper.pdf
+proc gen
+https://www.youtube.com/playlist?list=PLcRSafycjWFesScBq3JgHMNd9Tidvk9hE
+https://www.youtube.com/watch?v=NIiREmJnAX0&list=PLcRSafycjWFceHTT-m5wU51oVlJySCJbr&index=11
+https://link.springer.com/article/10.1007/s00371-020-01920-7
+marching cubes
+https://github.com/Javier-Garzo/Marching-cubes-on-Unity-3D
+https://github.com/Eldemarkki/Marching-Cubes-Terrain/
+misc
+https://forum.unity.com/threads/tutorial-procedural-meshes-and-voxel-terrain-c.198651/
+old
+https://blog.tedd.no/2018/12/22/building-a-voxel-engine-part-1/
+https://unitycoder.com/blog/2012/10/18/voxel-resources-engines-for-unity/
 
 
 ## Voxel Plugin notes

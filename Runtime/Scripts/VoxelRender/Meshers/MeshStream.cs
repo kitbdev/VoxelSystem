@@ -23,6 +23,9 @@ namespace VoxelSystem {
         public int indexCount;
         public Bounds bounds;
     }
+    /// <summary>
+    /// Helper for new Unity Mesh API for use with jobs
+    /// </summary>
     public struct MeshStream {
         [StructLayout(LayoutKind.Sequential)]
         public struct Vertex {

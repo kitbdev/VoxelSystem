@@ -19,7 +19,7 @@ namespace VoxelSystem {
         public float voxelSize = 1;
         public int chunkResolution = 16;
         public int octtreeDepth = 16;
-        public bool regenerateOnAwake = true;
+        public bool createAutomatically = true;
         public bool saveChunksInScene = false;
 
         public VoxelGenerator generator;
@@ -36,7 +36,7 @@ namespace VoxelSystem {
         // todo 
         public Layer layer;
         [Header("Material settings")]
-        public VoxelMaterialCollectionBaseSO materialSet;
+        public VoxelTypeHolderSO materialSet;
         // [Header("Navmesh settings")]
         [Header("LOD settings")]
         public int maxLOD;
@@ -54,23 +54,60 @@ namespace VoxelSystem {
             // mesher.OnValidate();
         }
 
+        private void OnEnable() {
+            if (createAutomatically) {
+                CreateWorld();
+            }
+        }
+        private void OnDisable() {
+            DestroyWorld();
+        }
+
+
+        // all chunks should be children of worlddatago
+        // global runtime logic components can be added to it (like physics? LOD? renderer? idk) 
+        GameObject worldDataGO = null;
+        void CreateWorld() {
+            if (worldDataGO != null) {
+                DestroyWorld();
+            }
+            // make container GO
+            worldDataGO = new GameObject("Voxel World Data");
+            worldDataGO.transform.parent = transform;
+
+            // load from save if applicable
+            // todo
+            // use generator
+        }
+        void DestroyWorld() {
+            if (worldDataGO != null) {
+                if (Application.isPlaying) {
+                    Destroy(worldDataGO);
+                } else {
+                    DestroyImmediate(worldDataGO);
+                }
+                worldDataGO = null;
+            }
+        }
+
+
         public void FinishedGeneration() {
             // event?
         }
 
-        public void StartGeneration() {
+        void StartGeneration() {
             if (generator == null) {
                 return;
             }
             generator.Generate();
         }
-        public void StartGenerationImmediate() {
+        void StartGenerationImmediate() {
             if (generator == null) {
                 return;
             }
             generator.GenerateImmediate();
         }
-        public void ClearGen() {
+        void ClearGen() {
             if (generator == null) {
                 return;
             }

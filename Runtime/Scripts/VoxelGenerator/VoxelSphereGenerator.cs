@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace VoxelSystem {
-    [CreateAssetMenu(fileName = "FlatVoxelGenerator", menuName = "VoxelSystem/Flat VoxelGenerator", order = 0)]
-    public class VoxelFlatGenerator : VoxelGenerator {
+    [CreateAssetMenu(fileName = "SphereVoxelGenerator", menuName = "VoxelSystem/Sphere VoxelGenerator", order = 0)]
+    public class VoxelSphereGenerator : VoxelGenerator {
         
         public float heightLevel;
         public VoxelTypeId surfaceType;
-        public VoxelTypeId underGroundType;
+        public VoxelTypeId centerType;
 
         public override void Clear() {
             throw new System.NotImplementedException();

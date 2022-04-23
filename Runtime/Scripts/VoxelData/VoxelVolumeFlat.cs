@@ -14,9 +14,9 @@ namespace VoxelSystem {
 
         // todo sparse array?
         // todo? jagged array is faster
-        [SerializeField, ReadOnly] Voxel[] _voxels;
+        [SerializeField, ReadOnly] IVoxel[] _voxels;
 
-        public Voxel[] voxels { get => _voxels; protected set => _voxels = value; }
+        public IVoxel[] voxels { get => _voxels; protected set => _voxels = value; }
         public int width => size.x;
         public int length => size.z;
         public int height => size.y;
@@ -25,39 +25,40 @@ namespace VoxelSystem {
 
         public VoxelVolumeFlat(Vector3Int size) {
             this.size = size;
-            this.voxels = new Voxel[0];
+            this.voxels = new IVoxel[0];
         }
 
         // init
 
-        public void PopulateWithNewVoxels() {
-            // empty is id 0
-            PopulateWithNewVoxels((VoxelMaterialId)0);
-        }
-        public void PopulateWithNewVoxels(VoxelMaterialId voxelMaterialId) {
-            voxels = new Voxel[volume];
-            for (int i = 0; i < volume; i++) {
-                Voxel voxel = new Voxel(voxelMaterialId);
-                voxels[i] = voxel;
-            }
-        }
-        public void PopulateWithNewVoxels(VoxelMaterialId[] voxelMaterialIds) {
-            if (voxelMaterialIds.Length != volume) return;
-            voxels = new Voxel[volume];
-            for (int i = 0; i < volume; i++) {
-                Voxel voxel = new Voxel(voxelMaterialIds[i]);
-                voxels[i] = voxel;
-            }
-        }
-        public void PopulateWithExistingVoxels(Voxel[] newVoxels) {
+        // public void PopulateWithNewVoxels() {
+        //     // empty is id 0
+        //     PopulateWithNewVoxels((VoxelTypeId)0);
+        // }
+        // todo
+        // public void PopulateWithNewVoxels(VoxelTypeId VoxelTypeId) {
+        //     voxels = new IVoxel[volume];
+        //     for (int i = 0; i < volume; i++) {
+        //         IVoxel IVoxel = new IVoxel(VoxelTypeId);
+        //         voxels[i] = IVoxel;
+        //     }
+        // }
+        // public void PopulateWithNewVoxels(VoxelTypeId[] voxelMaterialIds) {
+        //     if (voxelMaterialIds.Length != volume) return;
+        //     voxels = new IVoxel[volume];
+        //     for (int i = 0; i < volume; i++) {
+        //         IVoxel IVoxel = new IVoxel(voxelMaterialIds[i]);
+        //         voxels[i] = IVoxel;
+        //     }
+        // }
+        public void PopulateWithExistingVoxels(IVoxel[] newVoxels) {
             if (newVoxels.Length != volume) {
-                Debug.LogError($"Cannot set voxels to voxel volume, wrong size {newVoxels.Length} vs {volume}");
+                Debug.LogError($"Cannot set voxels to IVoxel volume, wrong size {newVoxels.Length} vs {volume}");
                 return;
             }
             voxels = newVoxels;
         }
         public void ClearAllVoxels() {
-            this.voxels = new Voxel[0];
+            this.voxels = new IVoxel[0];
         }
 
         // get
@@ -65,7 +66,7 @@ namespace VoxelSystem {
         public bool HasVoxelAt(Vector3Int pos) {
             return IndexAt(pos) >= 0;
         }
-        public Voxel GetVoxelAt(int index) {
+        public IVoxel GetVoxelAt(int index) {
             if (index < 0 || index >= voxels.Length) {
                 // invalid index
                 return default;
@@ -73,7 +74,7 @@ namespace VoxelSystem {
                 return voxels[index];
             }
         }
-        public Voxel GetVoxelAt(Vector3Int pos) {
+        public IVoxel GetVoxelAt(Vector3Int pos) {
             return GetVoxelAt(IndexAt(pos));
         }
         public int IndexAt(Vector3Int pos) {
@@ -85,7 +86,7 @@ namespace VoxelSystem {
 
         // set
 
-        public void SetVoxels(BoundsInt area, System.Func<Vector3Int, Voxel, Voxel> setFunc) {
+        public void SetVoxels(BoundsInt area, System.Func<Vector3Int, IVoxel, IVoxel> setFunc) {
             area.min = Vector3Int.Max(area.min, Vector3Int.zero);
             area.max = Vector3Int.Min(area.max, size);
             for (int y = area.yMin; y < area.yMax; y++) {
@@ -93,8 +94,8 @@ namespace VoxelSystem {
                     for (int x = area.xMin; x < area.xMax; x++) {
                         Vector3Int pos = new Vector3Int(x, y, z);
                         int i = IndexAt(pos);
-                        Voxel voxel = voxels[i];
-                        voxels[i] = setFunc(pos, voxel);
+                        IVoxel IVoxel = voxels[i];
+                        voxels[i] = setFunc(pos, IVoxel);
                     }
                 }
             }

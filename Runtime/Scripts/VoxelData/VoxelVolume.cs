@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace VoxelSystem {
     [System.Serializable]
-    public class VoxelVolume : IEnumerable {
+    public class VoxelVolume<VoxelT> : IEnumerable where VoxelT: struct, IVoxel {
 
         [SerializeField]
         Vector3Int size = Vector3Int.zero;
@@ -14,9 +14,9 @@ namespace VoxelSystem {
         // todo sparse array?
         // jagged array should be faster
         // y, z, x order
-        [SerializeField, ReadOnly] Voxel[][][] _voxels;
+        [SerializeField, ReadOnly] VoxelT[][][] _voxels;
 
-        public Voxel[][][] voxels { get => _voxels; protected set => _voxels = value; }
+        public VoxelT[][][] voxels { get => _voxels; protected set => _voxels = value; }
         public int width => size.x;
         public int length => size.z;
         public int height => size.y;
@@ -32,25 +32,26 @@ namespace VoxelSystem {
 
         public void PopulateWithNewVoxels() {
             // empty is id 0
-            PopulateWithNewVoxels((VoxelMaterialId)0);
+            PopulateWithNewVoxels((VoxelTypeId)0);
         }
-        public void PopulateWithNewVoxels(VoxelMaterialId voxelMaterialId) {
-            voxels = new Voxel[height][][];
+        public void PopulateWithNewVoxels(VoxelTypeId typeId) {
+            voxels = new VoxelT[height][][];
             for (int y = 0; y < size.y; y++) {
-                voxels[y] = new Voxel[length][];
+                voxels[y] = new VoxelT[length][];
                 for (int z = 0; z < size.z; z++) {
-                    voxels[y][z] = new Voxel[width];
+                    voxels[y][z] = new VoxelT[width];
                     for (int x = 0; x < size.x; x++) {
-                        Voxel voxel = new Voxel(voxelMaterialId);
-                        voxels[y][z][x] = voxel;
+                        VoxelT vox = new VoxelT();
+                        vox.Init(typeId);
+                        voxels[y][z][x] = vox;
                     }
                 }
             }
         }
-        public void PopulateWithExistingVoxels(Voxel[] newVoxels) => PopulateWithExistingVoxels(ToJagged(newVoxels, size));
-        public void PopulateWithExistingVoxels(Voxel[][][] newVoxels) {
+        public void PopulateWithExistingVoxels(VoxelT[] newVoxels) => PopulateWithExistingVoxels(ToJagged(newVoxels, size));
+        public void PopulateWithExistingVoxels(VoxelT[][][] newVoxels) {
             if (newVoxels.Length != volume) {
-                Debug.LogError($"Cannot set voxels to voxel volume, wrong size {newVoxels.Length} vs {volume}");
+                Debug.LogError($"Cannot set voxels to VoxelT volume, wrong size {newVoxels.Length} vs {volume}");
                 return;
             }
             voxels = newVoxels;
@@ -69,19 +70,19 @@ namespace VoxelSystem {
                 ;
         }
         /// <summary>
-        /// Returns the voxel at the specified position. must be in bounds or will throw exception
+        /// Returns the VoxelT at the specified position. must be in bounds or will throw exception
         /// </summary>
         /// <param name="pos"></param>
         /// <returns></returns>
-        public Voxel GetVoxelAt(Vector3Int pos) {
+        public VoxelT GetVoxelAt(Vector3Int pos) {
             return voxels[pos.y][pos.z][pos.x];
         }
-        public bool TryGetVoxelAt(Vector3Int pos, out Voxel voxel) {
+        public bool TryGetVoxelAt(Vector3Int pos, out VoxelT VoxelT) {
             if (HasVoxelAt(pos)) {
-                voxel = GetVoxelAt(pos);
+                VoxelT = GetVoxelAt(pos);
                 return true;
             }
-            voxel = default;
+            VoxelT = default;
             return false;
         }
 
@@ -90,40 +91,40 @@ namespace VoxelSystem {
         /// <summary>
         /// Set all voxels using a func
         /// </summary>
-        /// <param name="setFunc">input pos and original voxel, outputs new voxel</param>
-        public void SetVoxels(System.Func<Vector3Int, Voxel, Voxel> setFunc) {
+        /// <param name="setFunc">input pos and original VoxelT, outputs new VoxelT</param>
+        public void SetVoxels(System.Func<Vector3Int, VoxelT, VoxelT> setFunc) {
             SetVoxels(new BoundsInt(Vector3Int.zero, size), setFunc);
         }
         /// <summary>
         /// Set voxels in an area using a func
         /// </summary>
         /// <param name="area">area to set voxels in. will be clamped to size</param>
-        /// <param name="setFunc">input pos and original voxel, outputs new voxel</param>
-        public void SetVoxels(BoundsInt area, System.Func<Vector3Int, Voxel, Voxel> setFunc) {
+        /// <param name="setFunc">input pos and original VoxelT, outputs new VoxelT</param>
+        public void SetVoxels(BoundsInt area, System.Func<Vector3Int, VoxelT, VoxelT> setFunc) {
             area.min = Vector3Int.Max(area.min, Vector3Int.zero);
             area.max = Vector3Int.Min(area.max, size);
             for (int y = area.yMin; y < area.yMax; y++) {
                 for (int z = area.zMin; z < area.zMax; z++) {
                     for (int x = area.xMin; x < area.xMax; x++) {
                         Vector3Int pos = new Vector3Int(x, y, z);
-                        Voxel voxel = voxels[y][z][x];
-                        voxels[y][z][x] = setFunc(pos, voxel);
+                        VoxelT VoxelT = voxels[y][z][x];
+                        voxels[y][z][x] = setFunc(pos, VoxelT);
                     }
                 }
             }
         }
         /// <summary>
-        /// Set voxels in an area using a voxel type
+        /// Set voxels in an area using a VoxelT type
         /// </summary>
         /// <param name="area">area to set voxels in. will be clamped to size</param>
-        public void SetVoxels(BoundsInt area, Voxel newVoxel) {
+        public void SetVoxels(BoundsInt area, VoxelT newVoxel) {
             area.min = Vector3Int.Max(area.min, Vector3Int.zero);
             area.max = Vector3Int.Min(area.max, size);
             for (int y = area.yMin; y < area.yMax; y++) {
                 for (int z = area.zMin; z < area.zMax; z++) {
                     for (int x = area.xMin; x < area.xMax; x++) {
-                        Voxel voxel = voxels[y][z][x];
-                        // ? copy voxel? its a struct so w/e
+                        VoxelT VoxelT = voxels[y][z][x];
+                        // ? copy VoxelT? its a struct so w/e
                         voxels[y][z][x] = newVoxel;
                     }
                 }
@@ -132,15 +133,15 @@ namespace VoxelSystem {
 
         // util
 
-        public IEnumerable<Voxel> ToFlatArray() {
+        public IEnumerable<VoxelT> ToFlatArray() {
             return voxels.SelectMany(v2 => v2.SelectMany(v1 => v1));
         }
-        static Voxel[][][] ToJagged(Voxel[] flat, Vector3Int dimensions) {
-            Voxel[][][] jagged = new Voxel[dimensions.y][][];
+        static VoxelT[][][] ToJagged(VoxelT[] flat, Vector3Int dimensions) {
+            VoxelT[][][] jagged = new VoxelT[dimensions.y][][];
             for (int y = 0; y < dimensions.y; y++) {
-                jagged[y] = new Voxel[dimensions.z][];
+                jagged[y] = new VoxelT[dimensions.z][];
                 for (int z = 0; z < dimensions.z; z++) {
-                    jagged[y][z] = new Voxel[dimensions.x];
+                    jagged[y][z] = new VoxelT[dimensions.x];
                     for (int x = 0; x < dimensions.x; x++) {
                         int i = x + z * dimensions.x + y * dimensions.x * dimensions.y;
                         jagged[y][z][x] = flat[i];
@@ -160,7 +161,7 @@ namespace VoxelSystem {
             return voxels.GetHashCode();
         }
         public override string ToString() {
-            return $"Voxel Volume {size}";
+            return $"VoxelT Volume {size}";
         }
 
         // todo saving and compression

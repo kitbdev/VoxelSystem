@@ -2,8 +2,13 @@
 using UnityEngine;
 
 namespace VoxelSystem {
+    /// <summary>
+    /// greedy cubic mesher. 
+    /// uses new unity mesh api.
+    /// slower than quick greedy, but saves more tris
+    /// </summary>
     [System.Serializable]
-    public class VoxelQuickGreedyMesher : VoxelMesherBase {
+    public class VoxelGreedyCubicMesher : VoxelMesherBase {
         public override void ClearMesh() {
             throw new System.NotImplementedException();
         }

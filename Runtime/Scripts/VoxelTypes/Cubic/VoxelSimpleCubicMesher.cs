@@ -9,7 +9,7 @@ namespace VoxelSystem {
     /// Slower mesher that uses old unity mesh api
     /// </summary>
     [System.Serializable]
-    public class VoxelSimpleMesher : VoxelMesherBase {
+    public class VoxelSimpleCubicMesher : VoxelMesherBase {
 
         // public override TypeChoice<VoxelMaterial> neededMaterial => typeof(TexturedMaterial);
         // public override TypeChoice<VoxelData>[] neededDatas => new TypeChoice<VoxelData>[] {

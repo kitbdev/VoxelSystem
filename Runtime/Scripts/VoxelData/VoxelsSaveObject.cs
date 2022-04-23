@@ -7,6 +7,6 @@ namespace VoxelSystem {
     /// </summary>
     public class VoxelsSaveObject : ScriptableObject {
         // ? split into multiple chunks? compressed?
-        VoxelVolume voxelVolume;
+        // VoxelVolume<> voxelVolume;
     }
 }
