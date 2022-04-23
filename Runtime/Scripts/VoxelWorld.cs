@@ -36,7 +36,7 @@ namespace VoxelSystem {
         // todo 
         public Layer layer;
         [Header("Material settings")]
-        public VoxelTypeHolderSO materialSet;
+        public VoxelTypeHolder materialSet;
         // [Header("Navmesh settings")]
         [Header("LOD settings")]
         public int maxLOD;
@@ -47,6 +47,7 @@ namespace VoxelSystem {
         public bool debugEnabled = false;
 
         public VoxelOctree voxelOctree;
+        public VoxelTypeId type;
 
 
         private void OnValidate() {

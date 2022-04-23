@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace VoxelSystem {
     [System.Serializable]
-    public class VoxelVolume<VoxelT> : IEnumerable where VoxelT: struct, IVoxel {
+    public class VoxelVolume<VoxelT> : IEnumerable where VoxelT : struct, IVoxel {
 
         [SerializeField]
         Vector3Int size = Vector3Int.zero;
@@ -32,7 +32,7 @@ namespace VoxelSystem {
 
         public void PopulateWithNewVoxels() {
             // empty is id 0
-            PopulateWithNewVoxels((VoxelTypeId)0);
+            PopulateWithNewVoxels(new VoxelTypeId(0));
         }
         public void PopulateWithNewVoxels(VoxelTypeId typeId) {
             voxels = new VoxelT[height][][];

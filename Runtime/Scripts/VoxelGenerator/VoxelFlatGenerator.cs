@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace VoxelSystem {
-    [CreateAssetMenu(fileName = "FlatVoxelGenerator", menuName = "VoxelSystem/Flat VoxelGenerator", order = 0)]
+    [CreateAssetMenu(fileName = "FlatVoxelGenerator", menuName = "VoxelSystem/Generator/Flat VoxelGenerator", order = 0)]
     public class VoxelFlatGenerator : VoxelGenerator {
         
         public float heightLevel;

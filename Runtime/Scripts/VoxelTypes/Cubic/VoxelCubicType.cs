@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kutil;
 using UnityEngine;
 
@@ -11,7 +12,8 @@ namespace VoxelSystem {
     public class VoxelCubicType : IVoxelType {
         [Header("General")]
         public bool hasMesh = true;
-        public Kutil.Layer sperateLayer = -1;
+        public bool onSeperateLayer = false;
+        public Kutil.Layer sperateLayer = 0;
         public bool isTransparent = false;
         public bool showConnectedFacesOfSameType = false;
         public Material mat;
@@ -31,18 +33,23 @@ namespace VoxelSystem {
         // public int navMeshWalkable = 0;
 
 
+        public override IEnumerable<Material> GetAllMats() {
+            return new Material[] { mat };
+        }
         public override IVoxelType GetErrorType() => new VoxelCubicType() {
+            name = "Error",
             hasMesh = true,
             isTransparent = false,
-            sperateLayer = -1,
+            onSeperateLayer = false,
             mat = null,// todo error mat
             hasCollision = false,
         };
 
-        public override IVoxelType GetVoidType() => new VoxelCubicType() {
+        public override IVoxelType GetEmptyType() => new VoxelCubicType() {
+            name = "Empty",
             hasMesh = false,
             isTransparent = true,
-            sperateLayer = -1,
+            onSeperateLayer = false,
             mat = null,
             hasCollision = false,
         };
@@ -82,8 +89,14 @@ namespace VoxelSystem {
         [ConditionalHide(nameof(splitFaces), true)]
         public Vector2Int texcoordLeft;
 
-        
+
+        public override IEnumerable<Material> GetAllMats() {
+            // todo 
+            return default;
+            // return new Material[] { mat };
+        }
         public override IVoxelType GetErrorType() => new VoxelCubicType() {
+            name = "Error",
             hasMesh = true,
             isTransparent = false,
             sperateLayer = -1,
@@ -91,7 +104,8 @@ namespace VoxelSystem {
             hasCollision = false,
         };
 
-        public override IVoxelType GetVoidType() => new VoxelCubicType() {
+        public override IVoxelType GetEmptyType() => new VoxelCubicType() {
+            name = "Empty",
             hasMesh = false,
             isTransparent = true,
             sperateLayer = -1,
@@ -102,8 +116,14 @@ namespace VoxelSystem {
     [System.Serializable]
     public class VoxelDensityType : IVoxelType {
 
-        
+
+        public override IEnumerable<Material> GetAllMats() {
+            // todo 
+            return default;
+            // return new Material[] { mat };
+        }
         public override IVoxelType GetErrorType() => new VoxelCubicType() {
+            name = "Error",
             hasMesh = true,
             isTransparent = false,
             sperateLayer = -1,
@@ -111,7 +131,8 @@ namespace VoxelSystem {
             hasCollision = false,
         };
 
-        public override IVoxelType GetVoidType() => new VoxelCubicType() {
+        public override IVoxelType GetEmptyType() => new VoxelCubicType() {
+            name = "Empty",
             hasMesh = false,
             isTransparent = true,
             sperateLayer = -1,

@@ -11,10 +11,6 @@ namespace VoxelSystem {
     [System.Serializable]
     public class VoxelSimpleCubicMesher : VoxelMesherBase {
 
-        // public override TypeChoice<VoxelMaterial> neededMaterial => typeof(TexturedMaterial);
-        // public override TypeChoice<VoxelData>[] neededDatas => new TypeChoice<VoxelData>[] {
-        //                 typeof(MeshCacheVoxelData) };
-
         Vector2 textureUVScale = Vector3.one;// = 16f / 512;
 
         Mesh mesh;
