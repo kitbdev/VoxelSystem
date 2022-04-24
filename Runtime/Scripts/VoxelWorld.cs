@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Kutil;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace VoxelSystem {
     /*
@@ -25,7 +26,9 @@ namespace VoxelSystem {
         public VoxelGenerator generator;
 
         [Header("Save settings")]
+        // If true, will save the world to SaveFilePath each time it's saved to the save object
         public bool autoSave = false;
+        // Automatically loaded on creation
         public VoxelsSaveObject saveObject;//todo
         public Object loadBtnObject;//todo 
         // [Header("Generator settings")]
@@ -75,6 +78,21 @@ namespace VoxelSystem {
         public VoxelTypeId typetest;
 
 
+        /// <summary>
+        /// Called when generating the world, right after it's created.
+        /// Use this to add data items, or to do something right after the world is created
+        /// </summary>
+        public UnityEvent OnGenerateWorldEvent;
+        public UnityEvent OnWorldLoadedEvent;
+        /// <summary>
+        /// Called right before destroying the world. Use this if you want to save data
+        /// </summary>
+        public UnityEvent OnWorldDestroyedEvent;
+
+
+        bool isLoaded = false;
+        float creationStartTime = 0;
+
         private void OnValidate() {
             // Debug.Log("onval vw");
             // mesher.OnValidate();
@@ -90,20 +108,55 @@ namespace VoxelSystem {
         }
 
 
+        public static class VoxelDataTools {
+            // for saves and stuff
+
+            public struct FVoxelUncompressedWorldSave { }//?
+            public static bool LoadFromSave(VoxelWorld world, FVoxelUncompressedWorldSave save) {
+                if (world == null) return false;
+                // todo
+                // world.voxelOctree.Load
+                return false;
+            }
+            // todo save
+            // todo compress
+        }
+
         // all chunks should be children of worlddatago
         // global runtime logic components can be added to it (like physics? LOD? renderer? idk) 
         GameObject worldDataGO = null;
-        void CreateWorld() {
-            if (worldDataGO != null) {
+        void RecreateWorld() {
+            if (isLoaded) {
+                // if (worldDataGO != null) {
                 DestroyWorld();
             }
-            // make container GO
+            CreateWorld();
+        }
+        void CreateWorld() {
+            if (isLoaded || worldDataGO != null) {
+                Debug.LogError("Cannot create world, already created", this);
+                return;
+            }
+            Debug.Log("Loading World");
+
+            isLoaded = false;
+            creationStartTime = Time.time;
+
+            // setup world data container GO
             worldDataGO = new GameObject("Voxel World Data");
             worldDataGO.transform.parent = transform;
 
-            // load from save if applicable
+            bool overrideData = true;
+            if (overrideData) {
+                // use generator
+
+            } else {
+                // load from save if applicable
+                // todo checks
+                VoxelDataTools.LoadFromSave(this, default);
+            }
+            OnGenerateWorldEvent?.Invoke();
             // todo
-            // use generator
         }
         void DestroyWorld() {
             if (worldDataGO != null) {
@@ -117,8 +170,17 @@ namespace VoxelSystem {
         }
 
 
-        public void FinishedGeneration() {
-            // event?
+
+        void OnWorldLoaded() {
+            isLoaded = true;
+            Debug.LogFormat(this, "%s took %fs to generate", name, Time.time - creationStartTime);
+            // if (bSimulatePhysicsOnceLoaded) {
+            //     WorldRoot->BodyInstance.SetInstanceSimulatePhysics(true);
+            // }
+            OnWorldLoadedEvent?.Invoke();
+        }
+        public void FinishedGenerationCallback() {
+            OnWorldLoaded();
         }
 
         void StartGeneration() {

@@ -6,6 +6,7 @@
 //          can have different materials/textures per face
 // density - allows smooth marching cubes, maybe sharp edges? material or color data
 
+// todo rename Type to VoxelMaterial?
 
 
 // box encoding? better than rle?

@@ -12,7 +12,8 @@ namespace VoxelSystem {
     /// </summary>
     /// <typeparam name="VoxelT"></typeparam>
     public class VoxelOctree<VoxelT> where VoxelT : struct, IVoxel {
-        public Octree<VoxelT> octree;
+
+        Octree<VoxelT> octree;
         // todo
         // ? write lock mutex
 
@@ -20,7 +21,9 @@ namespace VoxelSystem {
         public BoundsInt bounds;
         public int depth;
         // ? generator ref
+
         // public bool enableUndoRedo;// todo
+        bool isDirty = false;
 
 
         /// <summary>
@@ -58,10 +61,55 @@ namespace VoxelSystem {
         // todo lod stuff
 
         #endregion
-        // todo
+
+        #region Setters
         // setters
+        // todo
+
+
+        #endregion
+
+
+        #region Save Load
         // save, load
+        // todo
+
+        public struct FVoxelUncompressedWorldSaveImpl { }
+        /// <summary>
+        /// Get a save of this world. No lock required
+        /// </summary>
+        /// <param name="outSave">out the finished save data</param>
+        /// <param name="outObjects">out ?</param>//FVoxelObjectArchiveEntry
+        void GetSave(out FVoxelUncompressedWorldSaveImpl outSave, out List<GameObject> outObjects) {
+            outSave = default;
+            outObjects = default;
+        }
+
+        struct LoadInfo { }//FVoxelPlaceableItemLoadInfo
+         /// <summary>
+         /// Load this world from save. No lock required
+         /// </summary>
+         /// <param name="saveData">Save to load from</param>
+         /// <param name="loadInfo">Used to load placeable items. Can use {}</param>
+         /// <param name="outBoundsToUpdate">The modified bounds</param>
+         /// <returns>true if loaded successfully, false if the world is corrupted and must not be saved again</returns>
+        bool LoadFromSave(FVoxelUncompressedWorldSaveImpl saveData, LoadInfo loadInfo, List<BoundsInt> outBoundsToUpdate = null) {
+            return false;
+        }
+
+        #endregion
+
+        #region Undo Redo
         // undo?
+        // todo
+
+        // Dirty state: can use that to track if the data is dirty
+        // MarkAsDirty is called on Undo, Redo, SaveFrame and ClearData
+        bool IsDirty() => isDirty;
+        void MarkAsDirty() => isDirty = true;
+        void ClearDirtyFlag() => isDirty = false;
+
+        #endregion
         // convert to voxel volume
     }
 }

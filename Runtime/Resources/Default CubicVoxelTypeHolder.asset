@@ -14,13 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelTypeDict:
     keys:
-    - id: 0
+    - idName: empty
+      typeHolder: {fileID: 0}
     values:
-    - hasMesh: 1
+    - name: Empty
+      hasMesh: 0
       onSeperateLayer: 0
       sperateLayer:
         layerValue: 0
-      isTransparent: 0
+      isTransparent: 1
       showConnectedFacesOfSameType: 0
       mat: {fileID: 0}
       uvCoord: {x: 0, y: 0}
@@ -32,13 +34,15 @@ MonoBehaviour:
     editInEditor: 0
     serializedDict:
     - key:
-        id: 0
+        idName: empty
+        typeHolder: {fileID: 0}
       value:
-        hasMesh: 1
+        name: Empty
+        hasMesh: 0
         onSeperateLayer: 0
         sperateLayer:
           layerValue: 0
-        isTransparent: 0
+        isTransparent: 1
         showConnectedFacesOfSameType: 0
         mat: {fileID: 0}
         uvCoord: {x: 0, y: 0}

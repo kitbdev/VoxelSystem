@@ -18,7 +18,7 @@ namespace VoxelSystem {
 
         public void FinishedGeneration() {
             //? do we need this
-            voxelWorld.FinishedGeneration();
+            voxelWorld.FinishedGenerationCallback();
         }
     }
 }
