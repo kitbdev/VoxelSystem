@@ -1,8 +1,10 @@
+using System.IO;
+
 namespace VoxelSystem {
     /// <summary>
     /// Stores instance information for Cuboid voxels
     /// </summary>
-    [System.Serializable]
+    /// [System.Serializable]
     public struct VoxelCuboid : IVoxel {
         public VoxelTypeIdVoxelData typeId;
         // ?
@@ -33,6 +35,18 @@ namespace VoxelSystem {
         }
         public override string ToString() {
             return typeId.ToString();
+        }
+
+        public string GetName() => "VoxelCuboid";
+        public string GetVersion() => "0.1";
+
+        public void Save(Stream writer) {
+            typeId.Save(writer);
+            // todo save dir
+        }
+
+        public void Load(Stream reader) {
+            typeId.Save(reader);
         }
     }
 }

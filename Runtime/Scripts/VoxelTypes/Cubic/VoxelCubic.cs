@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 namespace VoxelSystem {
@@ -24,6 +25,17 @@ namespace VoxelSystem {
 
         public override string ToString() {
             return typeId.ToString();
+        }
+
+        public string GetName() => "VoxelCubic";
+        public string GetVersion() => "0.1";
+
+        public void Save(Stream writer) {
+            typeId.Save(writer);
+        }
+
+        public void Load(Stream reader) {
+            typeId.Save(reader);
         }
     }
 }

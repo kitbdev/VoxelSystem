@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Kutil;
+using System;
 
 namespace VoxelSystem {
     // like FVoxelData
@@ -11,26 +12,29 @@ namespace VoxelSystem {
     /// Holds voxels in a sparse Octtree
     /// </summary>
     /// <typeparam name="VoxelT"></typeparam>
-    public class VoxelOctree<VoxelT> where VoxelT : struct, IVoxel {
+    public class VoxelOctree<VoxelT> : IVoxelVolume<VoxelT> where VoxelT : struct, IVoxel {
 
         Octree<VoxelT> octree;
         // todo
         // ? write lock mutex
 
         /// ? world space
-        public BoundsInt bounds;
+        BoundsInt bounds;
         public int depth;
         // ? generator ref
 
         // public bool enableUndoRedo;// todo
         bool isDirty = false;
 
+        public Vector3Int Size => bounds.size;
+        public BoundsInt GetBounds() => bounds;
+
 
         /// <summary>
         /// Must NOT be locked. Will delete the entire octree & recreate one.
         /// Destroys all items
         /// </summary>
-        void ClearAllData() {
+        public void ClearAllVoxels() {
             octree.Clear();
         }
 
@@ -46,14 +50,18 @@ namespace VoxelSystem {
                 && pos.x >= bounds.xMin && pos.x <= bounds.xMax;
         }
 
-        public VoxelT GetVoxelAt(Vector3Int pos, int lod = 0) {// does lod make sense here?
-            // return voxels[pos.y][pos.z][pos.x];
+        public VoxelT GetVoxelAt(Vector3Int pos) {
+            return GetVoxelAt(pos, 0);
+        }
+        public VoxelT GetVoxelAt(Vector3Int pos, int lod) {// does lod make sense here?
+            // todo
             return default;
         }
-        VoxelVolume<VoxelT> GetAllVoxels(int lod = 0) {
+        public VoxelVolume<VoxelT> GetAllVoxels(int lod = 0) {
             return GetVoxelsInBounds(bounds, lod);
         }
-        VoxelVolume<VoxelT> GetVoxelsInBounds(BoundsInt bounds, int lod) {
+        public VoxelVolume<VoxelT> GetVoxelsInBounds(BoundsInt bounds) => GetVoxelsInBounds(bounds, 0);
+        public VoxelVolume<VoxelT> GetVoxelsInBounds(BoundsInt bounds, int lod) {
             return default;
         }
         // todo get tree node?
@@ -66,6 +74,25 @@ namespace VoxelSystem {
         // setters
         // todo
 
+        public void SetVoxel(Vector3Int pos, VoxelT newVoxel) {
+            // may need to split node into multiple
+            throw new NotImplementedException();
+        }
+
+        public void SetVoxels(BoundsInt area, Func<Vector3Int, VoxelT, VoxelT> setFunc) {
+            throw new NotImplementedException();
+        }
+
+        public void SetVoxels(Vector3Int startOffset, VoxelVolume<VoxelT> fromVoxels) {
+            throw new NotImplementedException();
+        }
+        public void SetVoxels(IEnumerable<Vector3Int> positions, VoxelT newVoxel) {
+
+        }
+        public void FinishUpdating() {
+            // todo dont prune the whole thing, just parts of it?
+            octree.root.Prune();
+        }
 
         #endregion
 
@@ -86,13 +113,13 @@ namespace VoxelSystem {
         }
 
         struct LoadInfo { }//FVoxelPlaceableItemLoadInfo
-         /// <summary>
-         /// Load this world from save. No lock required
-         /// </summary>
-         /// <param name="saveData">Save to load from</param>
-         /// <param name="loadInfo">Used to load placeable items. Can use {}</param>
-         /// <param name="outBoundsToUpdate">The modified bounds</param>
-         /// <returns>true if loaded successfully, false if the world is corrupted and must not be saved again</returns>
+        /// <summary>
+        /// Load this world from save. No lock required
+        /// </summary>
+        /// <param name="saveData">Save to load from</param>
+        /// <param name="loadInfo">Used to load placeable items. Can use {}</param>
+        /// <param name="outBoundsToUpdate">The modified bounds</param>
+        /// <returns>true if loaded successfully, false if the world is corrupted and must not be saved again</returns>
         bool LoadFromSave(FVoxelUncompressedWorldSaveImpl saveData, LoadInfo loadInfo, List<BoundsInt> outBoundsToUpdate = null) {
             return false;
         }
@@ -108,6 +135,12 @@ namespace VoxelSystem {
         bool IsDirty() => isDirty;
         void MarkAsDirty() => isDirty = true;
         void ClearDirtyFlag() => isDirty = false;
+
+
+
+        public IEnumerator GetEnumerator() {
+            throw new NotImplementedException();
+        }
 
         #endregion
         // convert to voxel volume

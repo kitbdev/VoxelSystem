@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 // fixed size generic octree
@@ -18,21 +20,31 @@ namespace VoxelSystem {
             root = new OctreeParent<TData>((byte)maxHeight);
         }
     }
+    /// <summary>
+    /// Either a parent or a leaf for an octree
+    /// </summary>
+    /// <typeparam name="TData"></typeparam>
     [System.Serializable]
     public abstract class OctreeNode<TData> : System.IDisposable
     where TData : struct {
 
         public int chunksize;
 
+        public OctreeParent<TData> parent;
+        public byte childIndex;
+
         public int height;
         public Vector3Int pos;
 
-        public OctreeNode(int height, Vector3Int pos) {
+        public OctreeNode(int height, Vector3Int pos, OctreeParent<TData> parent, byte childIndex) {
             this.height = height;
             this.pos = pos;
+            this.parent = parent;
+            this.childIndex = childIndex;
             Debug.Assert(height < 32);
         }
-        public bool IsLeaf() => height == 0;
+        public abstract bool IsLeaf();
+        public bool IsBottomLevel() => height == 0;
         public int GetSize() => chunksize << height;
         public int GetHalfSize() => (chunksize / 2) << height;
         public Vector3Int GetMin() => pos - GetHalfSize() * Vector3Int.one;
@@ -58,6 +70,45 @@ namespace VoxelSystem {
                     parentSize / 4 * ((childIndex & 0x4) > 0 ? 1 : -1));
         }
 
+        public abstract TData GetValue(Vector3Int pos);
+        public abstract void SetValue(Vector3Int pos, TData value);
+        public abstract void SetAllToValue(TData value);
+
+        /// <summary>
+        /// Change into a leaf node if all children have the same value. 
+        /// recursively, start with children.
+        /// </summary>
+        public void Prune() {
+            // todo
+            if (this is OctreeParent<TData> parent) {
+                // recursively prune children
+                for (int i = 0; i < 8; i++) {
+                    OctreeNode<TData> child = parent.GetChild(i);
+                    if (!child.IsLeaf()) {
+                        child.Prune();
+                    }
+                }
+                // check that all children are leafs, they were all successfully pruned 
+                for (int i = 0; i < 8; i++) {
+                    OctreeNode<TData> child = parent.GetChild(i);
+                    if (!child.IsLeaf()) {
+                        return;
+                    }
+                }
+                // check if all values are the same
+                TData val = parent.GetLeafChild(0).GetValue();
+                for (int i = 0; i < 8; i++) {
+                    OctreeLeaf<TData> child = parent.GetLeafChild(i);
+                    if (!child.GetValue().Equals(val)) {
+                        return;
+                    }
+                }
+                // merge
+                parent.ConvertParentChildToLeaf(childIndex, val);
+                // todo anything else?
+            }// if leaf do nothing
+        }
+
         public abstract void Dispose();
     }
     // todo new() instead of struct? would that even help with having an interface?
@@ -65,10 +116,12 @@ namespace VoxelSystem {
     [System.Serializable]
     public sealed class OctreeLeaf<TData> : OctreeNode<TData> where TData : struct {
 
-        public TData data;
+        TData data;
+        public override bool IsLeaf() => true;
 
-        public OctreeLeaf(OctreeNode<TData> parent, byte childIndex)
-            : base(parent.height - 1, GetChildPosition(parent.pos, parent.GetSize(), childIndex)) {
+        public OctreeLeaf(OctreeParent<TData> parent, byte childIndex)
+            : base(parent.height - 1, GetChildPosition(parent.pos, parent.GetSize(), childIndex),
+            parent, childIndex) {
             Debug.Assert(0 <= childIndex && childIndex < 8);
         }
 
@@ -76,6 +129,25 @@ namespace VoxelSystem {
             if (data is System.IDisposable ddata) {
                 ddata.Dispose();
             }
+        }
+
+        public TData GetValue() => data;
+        public override TData GetValue(Vector3Int pos) {
+            return data;
+        }
+
+        public override void SetValue(Vector3Int pos, TData value) {
+            if (IsBottomLevel()) {
+                data = value;
+            } else {
+                Split().SetValue(pos, value);
+            }
+        }
+        public override void SetAllToValue(TData value) {
+            data = value;
+        }
+        public OctreeParent<TData> Split() {
+            return parent.ConvertLeafChildToParent(childIndex);
         }
     }
     // public class OctreeParent : OctreeNode, System.Collections.IEnumerable {
@@ -94,33 +166,51 @@ namespace VoxelSystem {
         // [SerializeField] OctreeNode childFUR;
         [SerializeField] OctreeNode<TData>[] children = null;
 
+        public override bool IsLeaf() => false;
+
+        /// <summary>
+        /// Create new root parent
+        /// </summary>
+        /// <param name="height"></param>
         public OctreeParent(byte height)
-            : base(height, Vector3Int.zero) {
+            : base(height, Vector3Int.zero, null, 0) {
+            CreateChildren();
         }
 
         OctreeParent(OctreeParent<TData> parent, byte childIndex)
-        : base(parent.height - 1, GetChildPosition(parent.pos, parent.GetSize(), childIndex)) {
+        : base(parent.height - 1, GetChildPosition(parent.pos, parent.GetSize(), childIndex), parent, childIndex) {
             Debug.Assert(0 <= childIndex && childIndex < 8);
+            CreateChildren();
         }
 
         public bool HasChildren() => children != null;
         public OctreeNode<TData>[] GetChildren() => children;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeNode<TData> GetChild(int x, int y, int z) => GetChild(GetChildIndex(x, y, z));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeNode<TData> GetChild(Vector3Int pos) => GetChild(pos.x, pos.y, pos.z);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeNode<TData> GetChild(int childIndex) {
-            if (childIndex < 0 || childIndex > 8) {
-                Debug.LogError($"GetChild child index invalid: {childIndex}");
-                return null;
-            }
+            // assumes its valid. GetChildIndex only returns 0-7 anyway
+            // if (childIndex < 0 || childIndex > 8) {
+            //     Debug.LogError($"GetChild child index invalid: {childIndex}");
+            //     return null;
+            // }
             return children[childIndex];
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeLeaf<TData> GetLeafChild(int x, int y, int z) => GetLeafChild(GetChildIndex(x, y, z));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeLeaf<TData> GetLeafChild(Vector3Int pos) => GetLeafChild(pos.x, pos.y, pos.z);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeLeaf<TData> GetLeafChild(int childIndex) {
             return (OctreeLeaf<TData>)GetChild(childIndex);
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeParent<TData> GetParentChild(int x, int y, int z) => GetParentChild(GetChildIndex(x, y, z));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeParent<TData> GetParentChild(Vector3Int pos) => GetParentChild(pos.x, pos.y, pos.z);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public OctreeParent<TData> GetParentChild(int childIndex) {
             return (OctreeParent<TData>)GetChild(childIndex);
         }
@@ -129,15 +219,38 @@ namespace VoxelSystem {
             Debug.Assert(!HasChildren() && !IsLeaf());
             children = new OctreeNode<TData>[8];
             for (int i = 0; i < 8; i++) {
-                if (height == 1) {
-                    // todo sparse octree
-                    // make leaf
-                    children[i] = new OctreeLeaf<TData>(this, (byte)i);
-                } else {
-                    // make parent
-                    children[i] = new OctreeParent<TData>(this, (byte)i);
-                }
+                // if (height == 1) {
+                //     // todo sparse octree
+                // make leaf
+                children[i] = new OctreeLeaf<TData>(this, (byte)i);
+                // } else {
+                //     // make parent
+                //     children[i] = new OctreeParent<TData>(this, (byte)i);
+                // }
             }
+        }
+        public OctreeParent<TData> ConvertLeafChildToParent(byte childIndex) {
+            if (children[childIndex] is OctreeParent<TData> p) {
+                // already done?
+                return p;
+            }
+            TData data = ((OctreeLeaf<TData>)children[childIndex]).GetValue();
+            // children[childIndex].Dispose();// todo dispose?
+            children[childIndex] = new OctreeParent<TData>(this, childIndex);
+            OctreeParent<TData> newChild = (OctreeParent<TData>)children[childIndex];
+            newChild.SetAllToValue(data);
+            return newChild;
+        }
+        public OctreeLeaf<TData> ConvertParentChildToLeaf(byte childIndex, TData value) {
+            if (children[childIndex] is OctreeLeaf<TData> leaf) {
+                // already done?
+                return leaf;
+            }
+            children[childIndex].Dispose();// todo dispose?
+            children[childIndex] = new OctreeLeaf<TData>(this, childIndex);
+            OctreeLeaf<TData> newChild = (OctreeLeaf<TData>)children[childIndex];
+            newChild.SetAllToValue(value);
+            return newChild;
         }
         void DestroyChildren() {
             Debug.Assert(HasChildren());
@@ -150,6 +263,15 @@ namespace VoxelSystem {
             return children.GetEnumerator();
         }
 
+        /// <summary>
+        /// Gets appropriate child index from world pos. In y -> z -> x order.
+        /// Does not check bounds
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <returns>child index from 0-8</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int GetChildIndex(int x, int y, int z) {
             // from absolute pos
             /*
@@ -165,7 +287,14 @@ namespace VoxelSystem {
             6: 011
             7: 111
             */
-            return (x >= pos.x ? 1 : 0) + 4 * (y >= pos.y ? 1 : 0) + 2 * (z >= pos.z ? 1 : 0);
+            return BoolTo01(x >= pos.x) + 4 * BoolTo01(y >= pos.y) + 2 * BoolTo01(z >= pos.z);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        int BoolTo01(bool val) {
+            // unsafe {
+            //     return *((byte*)(&val)); // 1
+            // }
+            return val ? 1 : 0;
         }
         Vector3Int GetRelPosFromIndex(byte index) {
             // gets the relative pos
@@ -182,6 +311,24 @@ namespace VoxelSystem {
                 DestroyChildren();
             }
         }
+
+        public override TData GetValue(Vector3Int pos) {
+            if (!GetBounds().Contains(pos)) {
+                // todo need to check at each level?
+                Debug.LogError($"Cannot get value {pos} is oob {GetBounds()} in Octree parent node<{nameof(TData)}>!");
+                return default;
+            }
+            return GetChild(pos).GetValue(pos);
+        }
+        public override void SetValue(Vector3Int pos, TData value) {
+            GetChild(pos).SetValue(pos, value);
+        }
+        public override void SetAllToValue(TData value) {
+            for (int i = 0; i < 8; i++) {
+                children[i].SetAllToValue(value);
+            }
+        }
+
 
         public OctreeNode<TData> this[int index] => children[index];
     }

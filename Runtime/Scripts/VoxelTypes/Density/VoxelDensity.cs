@@ -1,8 +1,10 @@
+using System.IO;
+
 namespace VoxelSystem {
     /// <summary>
     /// Stores instance information for Density voxels (smooth)
     /// </summary>
-    [System.Serializable]
+    /// [System.Serializable]
     public struct VoxelDensity : IVoxel {
         public VoxelTypeIdVoxelData typeId;
         public float density;
@@ -23,6 +25,21 @@ namespace VoxelSystem {
         }
         public override string ToString() {
             return typeId.ToString();
+        }
+
+        public string GetName() => "VoxelDensity";
+        public string GetVersion() => "0.1";
+
+        public void Save(Stream writer) {
+            typeId.Save(writer);
+            writer.Write(System.BitConverter.GetBytes(density));
+        }
+
+        public void Load(Stream reader) {
+            typeId.Save(reader);
+            byte[] buffer = new byte[sizeof(float)];
+            reader.Read(buffer);
+            density = System.BitConverter.ToSingle(buffer);
         }
     }
 }

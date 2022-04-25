@@ -1,4 +1,6 @@
 
+using System.IO;
+
 namespace VoxelSystem {
     // todo split editor data class from regular class?
     //  as editor needs to keep track of typeholderSO, but voxels dont need that individually
@@ -54,13 +56,13 @@ namespace VoxelSystem {
     /// Refers to a voxel type. stored in voxels.
     /// </summary>
     [System.Serializable]
-    public struct VoxelTypeIdVoxelData {
+    public struct VoxelTypeIdVoxelData : ISaveable {
         // ? System.UInt16 ? byte ? string??
         //? maybe multiple values?
-        public int id;
+        public ushort id;//=System.UInt16
 
         public VoxelTypeIdVoxelData(int id) {
-            this.id = id;
+            this.id = (ushort)id;
         }
 
         public bool IsValid() {
@@ -83,6 +85,19 @@ namespace VoxelSystem {
         }
         public override string ToString() {
             return "VTID:" + id.ToString();
+        }
+
+        public string GetName() => "VoxelTypeIdVD";
+
+        public string GetVersion() => "0.1";
+
+        public void Save(Stream writer) {
+            writer.Write(System.BitConverter.GetBytes(id));
+        }
+        public void Load(Stream reader) {
+            byte[] buffer = new byte[sizeof(ushort)];
+            reader.Read(buffer);
+            id = System.BitConverter.ToUInt16(buffer);
         }
 
         public static bool operator ==(VoxelTypeIdVoxelData a, VoxelTypeIdVoxelData b) => a.Equals(b);

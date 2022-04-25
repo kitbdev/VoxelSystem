@@ -129,6 +129,33 @@ https://blog.tedd.no/2018/12/22/building-a-voxel-engine-part-1/
 https://unitycoder.com/blog/2012/10/18/voxel-resources-engines-for-unity/
 
 
+voxel storage
+| type | array   | octree      | rle         | boxmodel |
+| ---- | -----   | ------      | -----       | -------- |
+| get  | 1       | log8n<sup>3 | n<sup>3     | n/a        |
+| set  | 1       | log8n<sup>3 | n/a         | n/a      |
+| mem  | n<sup>3 | 1< n<sup>2  | 1< n<sup>3  | 1\< n<sup>1</sup> ? |
+| save?| y       | no  ?       | y           | y          |
+<!-- n^2^  x<sup>2</sup> -->
+
+boxmodel theoretically stores entire volumes
+conversions usually based on voxel complexity - lots of multiple different types near each other  
+
+sparse octree only encodes surfaces, technically.  
+they cannot be stored sparsely though? eh it should be possible  
+something like  
+- |-v  
+- |-c  
+  - |-v 
+  - |-v  
+  - |-v  
+  - |-v   
+- |-v  
+- |-v  
+
+maybe hash table with vertical rles for changed voxels, and compressed table for unchanged voxels
+
+
 ## Voxel Plugin notes
 - voxel plugin unity
 - port to unity

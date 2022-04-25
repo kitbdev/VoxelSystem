@@ -14,7 +14,7 @@ namespace VoxelSystem {
     /// <summary>
     /// Interface for single voxel instance data
     /// </summary>
-    public interface IVoxel {
+    public interface IVoxel : ISaveable {
         void Init(VoxelTypeIdVoxelData typeId);
     }
 }

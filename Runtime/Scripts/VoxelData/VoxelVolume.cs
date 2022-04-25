@@ -7,11 +7,22 @@ using System.Runtime.CompilerServices;
 using System.IO;
 
 namespace VoxelSystem {
+    public static class BoundsIntExt {
+        public static bool BoundsIntIntersects(this BoundsInt bounds, BoundsInt other) {
+            return AsBounds(bounds).Intersects(AsBounds(other));
+        }
+        public static Bounds AsBounds(this BoundsInt bounds) {
+            return new Bounds(bounds.center, bounds.size);
+        }
+        public static bool BoundsIntContains(this BoundsInt bounds, BoundsInt smaller) {
+            return bounds.Contains(smaller.min) && bounds.Contains(smaller.max);
+        }
+    }
     /// <summary>
     /// Holds voxels in a 3 dimensional volume
     /// </summary>
     [System.Serializable]
-    public struct VoxelVolume<VoxelT> : IEnumerable where VoxelT : struct, IVoxel {
+    public struct VoxelVolume<VoxelT> : IVoxelVolume<VoxelT>, IEnumerable, ISaveable where VoxelT : struct, IVoxel {
 
         [SerializeField]
         Vector3Int size;// = Vector3Int.zero;
@@ -27,7 +38,7 @@ namespace VoxelSystem {
         public int height => size.y;
         public int volume => width * length * height;
         public int[] resolutions => new int[] { width, height, length };
-        public Vector3Int dimensions => size;
+        public Vector3Int Size => size;
 
 
         public VoxelVolume(Vector3Int size) {
@@ -111,7 +122,7 @@ namespace VoxelSystem {
         }
         public VoxelVolume<VoxelT> GetVoxelsInBounds(BoundsInt newBounds) {
             BoundsInt bounds = GetBounds();
-            if (!BoundsIntContains(bounds, newBounds)) {
+            if (!BoundsIntExt.BoundsIntContains(bounds, newBounds)) {
                 // if (!bounds.ContainsBounds(newBounds)) {
                 Debug.LogError("Cannot GetVoxels in bounds, new bounds are too large! bounds:" + bounds + " new:" + newBounds);
                 return default;
@@ -127,15 +138,6 @@ namespace VoxelSystem {
                 }
             }
             return newVol;
-        }
-        private static bool BoundsIntIntersects(BoundsInt bounds, BoundsInt other) {
-            return AsBounds(bounds).Intersects(AsBounds(other));
-        }
-        private static Bounds AsBounds(BoundsInt bounds) {
-            return new Bounds(bounds.center, bounds.size);
-        }
-        private static bool BoundsIntContains(BoundsInt bounds, BoundsInt smaller) {
-            return bounds.Contains(smaller.min) && bounds.Contains(smaller.max);
         }
 
         // set
@@ -162,13 +164,6 @@ namespace VoxelSystem {
         /// <param name="setFunc">input pos and original VoxelT, outputs new VoxelT</param>
         public void SetVoxels(VoxelT newVoxel) {
             SetVoxels(new BoundsInt(Vector3Int.zero, size), newVoxel);
-        }
-        /// <summary>
-        /// Set all voxels using a func
-        /// </summary>
-        /// <param name="setFunc">input pos and original VoxelT, outputs new VoxelT</param>
-        public void SetVoxels(System.Func<Vector3Int, VoxelT, VoxelT> setFunc) {
-            SetVoxels(new BoundsInt(Vector3Int.zero, size), setFunc);
         }
         /// <summary>
         /// Set voxels in an area using a func
@@ -205,13 +200,14 @@ namespace VoxelSystem {
                 }
             }
         }
+
         /// <summary>
         /// Set voxels in an area using another voxelVolume
         /// </summary>
         /// <param name="startOffset">area to set voxels in. will be clamped to size</param>
         public void SetVoxels(Vector3Int startOffset, VoxelVolume<VoxelT> fromVoxels) {
             startOffset = Vector3Int.Max(startOffset, Vector3Int.zero);
-            Vector3Int maxBound = startOffset + fromVoxels.dimensions;
+            Vector3Int maxBound = startOffset + fromVoxels.Size;
             maxBound = Vector3Int.Min(maxBound, size);
             for (int y = startOffset.y; y < maxBound.y; y++) {
                 for (int z = startOffset.z; z < maxBound.z; z++) {
@@ -222,6 +218,11 @@ namespace VoxelSystem {
                     }
                 }
             }
+        }
+        
+        public void FinishUpdating() {
+            // nothing
+            // maybe something with dirty flag?
         }
 
         // util
@@ -243,6 +244,40 @@ namespace VoxelSystem {
             }
             return jagged;
         }
+        // todo saving and compression
+
+        // save
+
+        public string GetName() => $"VoxelVolumeJagged<{new VoxelT().GetName()}>";
+        public string GetVersion() => "0.1";
+        public void Save(Stream writer) {// todo return false if failed? or throw
+            writer.Write(size);
+            // writer.BeginWrite();//todo async 
+            // writer.EndWrite();
+            for (int y = 0; y < size.y; y++) {
+                for (int z = 0; z < size.z; z++) {
+                    for (int x = 0; x < size.x; x++) {
+                        GetVoxelAt(x, y, z).Save(writer);
+                    }
+                }
+            }
+        }
+        public void Load(Stream reader) {
+            // todo test
+            ClearAllVoxels();
+            size = reader.ReadV3i();
+            for (int y = 0; y < size.y; y++) {
+                for (int z = 0; z < size.z; z++) {
+                    for (int x = 0; x < size.x; x++) {
+                        VoxelT vox = new VoxelT();
+                        vox.Load(reader);
+                        SetVoxel(x, y, z, vox);
+                    }
+                }
+            }
+        }
+
+        // misc
 
         public IEnumerator GetEnumerator() {
             return ToFlatArray().GetEnumerator();
@@ -257,9 +292,8 @@ namespace VoxelSystem {
             return $"VoxelT Volume {size}";
         }
 
-        // todo saving and compression
     }
-    public class RLEVoxelsEncoding<VoxelT> where VoxelT : struct, IVoxel {
+    public class RLEVoxelsEncoding<VoxelT> : ISaveable where VoxelT : struct, IVoxel {
         public class RLVoxels {
             public System.UInt16 count;
             public VoxelT value;
@@ -269,7 +303,7 @@ namespace VoxelSystem {
 
         public static RLEVoxelsEncoding<VoxelT> FromVolume(VoxelVolume<VoxelT> fromVolume) {
             RLEVoxelsEncoding<VoxelT> rleVox = new RLEVoxelsEncoding<VoxelT>();
-            rleVox.size = fromVolume.dimensions;
+            rleVox.size = fromVolume.Size;
             VoxelT[] flatVoxels = fromVolume.ToFlatArray().ToArray();
             RLVoxels curRL = null;
             foreach (var vox in flatVoxels) {
@@ -298,17 +332,20 @@ namespace VoxelSystem {
             voxelVolume.PopulateWithExistingVoxels(voxels.ToArray());
             return voxelVolume;
         }
-        public void Save(StreamWriter writer) {
+        public string GetName() => $"RLEVoxelsEncoding<{new VoxelT().GetName()}>";
+        public string GetVersion() => "0.1";
+
+        public void Save(Stream writer) {
             // todo an rle identifier?
             writer.Write(size);
             foreach (var rlVoxel in rlVoxels) {
-                writer.Write(rlVoxel.value);//? will this properly save it
+                rlVoxel.value.Save(writer);
                 writer.Write(rlVoxel.count);
                 // todo
                 // ? some seperator?
             }
         }
-        public void Load(StreamReader reader) {
+        public void Load(Stream reader) {
             // todo
             // reader.Read()
         }
@@ -325,12 +362,12 @@ namespace VoxelSystem {
 
         public static BoxVoxelsEncoding<VoxelT> FromVolume(VoxelVolume<VoxelT> fromVolume) {
             BoxVoxelsEncoding<VoxelT> boxVoxelsEncoding = new BoxVoxelsEncoding<VoxelT>();
-            boxVoxelsEncoding.size = fromVolume.dimensions;
+            boxVoxelsEncoding.size = fromVolume.Size;
             VoxelT[][][] voxels = fromVolume.voxels;
             Box box;
-            for (int y = 0; y < fromVolume.dimensions.y; y++) {
-                for (int z = 0; z < fromVolume.dimensions.z; z++) {
-                    for (int x = 0; x < fromVolume.dimensions.x; x++) {
+            for (int y = 0; y < fromVolume.Size.y; y++) {
+                for (int z = 0; z < fromVolume.Size.z; z++) {
+                    for (int x = 0; x < fromVolume.Size.x; x++) {
                         // new box
                         box = new Box();
                         box.value = voxels[y][z][x];
@@ -352,6 +389,8 @@ namespace VoxelSystem {
             }
             return voxelVolume;
         }
+        public string GetName() => $"BoxVoxelsEncoding<{new VoxelT().GetName()}>";
+        public string GetVersion() => "0.1";
 
         public IEnumerator GetEnumerator() {
             throw new System.NotImplementedException();
