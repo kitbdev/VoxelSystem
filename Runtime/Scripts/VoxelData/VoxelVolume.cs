@@ -7,22 +7,11 @@ using System.Runtime.CompilerServices;
 using System.IO;
 
 namespace VoxelSystem {
-    public static class BoundsIntExt {
-        public static bool BoundsIntIntersects(this BoundsInt bounds, BoundsInt other) {
-            return AsBounds(bounds).Intersects(AsBounds(other));
-        }
-        public static Bounds AsBounds(this BoundsInt bounds) {
-            return new Bounds(bounds.center, bounds.size);
-        }
-        public static bool BoundsIntContains(this BoundsInt bounds, BoundsInt smaller) {
-            return bounds.Contains(smaller.min) && bounds.Contains(smaller.max);
-        }
-    }
     /// <summary>
     /// Holds voxels in a 3 dimensional volume
     /// </summary>
     [System.Serializable]
-    public struct VoxelVolume<VoxelT> : IVoxelVolume<VoxelT>, IEnumerable, ISaveable where VoxelT : struct, IVoxel {
+    public class VoxelVolume<VoxelT> : IVoxelVolume<VoxelT>, ISaveable where VoxelT : struct, IVoxel {
 
         [SerializeField]
         Vector3Int size;// = Vector3Int.zero;
@@ -47,6 +36,11 @@ namespace VoxelSystem {
         }
 
         // init
+        
+        public void Init(Vector3Int newSize){
+            this.size = newSize;
+            _voxels = null;
+        }
 
         public void PopulateWithNewVoxels() {
             // empty is id 0
@@ -205,7 +199,7 @@ namespace VoxelSystem {
         /// Set voxels in an area using another voxelVolume
         /// </summary>
         /// <param name="startOffset">area to set voxels in. will be clamped to size</param>
-        public void SetVoxels(Vector3Int startOffset, VoxelVolume<VoxelT> fromVoxels) {
+        public void SetVoxels(Vector3Int startOffset, IVoxelVolume<VoxelT> fromVoxels) {
             startOffset = Vector3Int.Max(startOffset, Vector3Int.zero);
             Vector3Int maxBound = startOffset + fromVoxels.Size;
             maxBound = Vector3Int.Min(maxBound, size);
@@ -219,7 +213,7 @@ namespace VoxelSystem {
                 }
             }
         }
-        
+
         public void FinishUpdating() {
             // nothing
             // maybe something with dirty flag?
@@ -282,6 +276,10 @@ namespace VoxelSystem {
         public IEnumerator GetEnumerator() {
             return ToFlatArray().GetEnumerator();
         }
+        public IEnumerable<FullVoxel> GetFullVoxelEnumerable() {
+            var sz = Size;
+            return ToFlatArray().Select((v, i) => new FullVoxel(v, VoxelVolumeFlat.GetLocalPos(i, sz)));
+        }
         public override bool Equals(object obj) {
             return voxels.Equals(obj);
         }
@@ -290,110 +288,6 @@ namespace VoxelSystem {
         }
         public override string ToString() {
             return $"VoxelT Volume {size}";
-        }
-
-    }
-    public class RLEVoxelsEncoding<VoxelT> : ISaveable where VoxelT : struct, IVoxel {
-        public class RLVoxels {
-            public System.UInt16 count;
-            public VoxelT value;
-        }
-        public Vector3Int size;
-        public List<RLVoxels> rlVoxels = new List<RLVoxels>();
-
-        public static RLEVoxelsEncoding<VoxelT> FromVolume(VoxelVolume<VoxelT> fromVolume) {
-            RLEVoxelsEncoding<VoxelT> rleVox = new RLEVoxelsEncoding<VoxelT>();
-            rleVox.size = fromVolume.Size;
-            VoxelT[] flatVoxels = fromVolume.ToFlatArray().ToArray();
-            RLVoxels curRL = null;
-            foreach (var vox in flatVoxels) {
-                if (curRL != null && curRL.value.Equals(vox)) {
-                    curRL.count++;
-                } else {
-                    if (curRL != null) {
-                        rleVox.rlVoxels.Add(curRL);
-                    }
-                    curRL = new RLVoxels() {
-                        count = 1,
-                        value = vox,
-                    };
-                }
-            }
-            return rleVox;
-        }
-        public VoxelVolume<VoxelT> ToVolume() {
-            List<VoxelT> voxels = new List<VoxelT>();
-            foreach (var rlVoxel in rlVoxels) {
-                for (int i = 0; i < rlVoxel.count; i++) {
-                    voxels.Add(rlVoxel.value);
-                }
-            }
-            VoxelVolume<VoxelT> voxelVolume = new VoxelVolume<VoxelT>(size);
-            voxelVolume.PopulateWithExistingVoxels(voxels.ToArray());
-            return voxelVolume;
-        }
-        public string GetName() => $"RLEVoxelsEncoding<{new VoxelT().GetName()}>";
-        public string GetVersion() => "0.1";
-
-        public void Save(Stream writer) {
-            // todo an rle identifier?
-            writer.Write(size);
-            foreach (var rlVoxel in rlVoxels) {
-                rlVoxel.value.Save(writer);
-                writer.Write(rlVoxel.count);
-                // todo
-                // ? some seperator?
-            }
-        }
-        public void Load(Stream reader) {
-            // todo
-            // reader.Read()
-        }
-    }
-    public class BoxVoxelsEncoding<VoxelT> : IEnumerable where VoxelT : struct, IVoxel {
-        public struct Box {
-            public Vector3Int start;
-            public Vector3Int size;
-            public BoundsInt area => new BoundsInt(start, size);
-            public VoxelT value;
-        }
-        public Vector3Int size;
-        public List<Box> boxes = new List<Box>();
-
-        public static BoxVoxelsEncoding<VoxelT> FromVolume(VoxelVolume<VoxelT> fromVolume) {
-            BoxVoxelsEncoding<VoxelT> boxVoxelsEncoding = new BoxVoxelsEncoding<VoxelT>();
-            boxVoxelsEncoding.size = fromVolume.Size;
-            VoxelT[][][] voxels = fromVolume.voxels;
-            Box box;
-            for (int y = 0; y < fromVolume.Size.y; y++) {
-                for (int z = 0; z < fromVolume.Size.z; z++) {
-                    for (int x = 0; x < fromVolume.Size.x; x++) {
-                        // new box
-                        box = new Box();
-                        box.value = voxels[y][z][x];
-                        box.start = new Vector3Int(x, y, z);
-                        // todo
-
-                        boxVoxelsEncoding.boxes.Add(box);
-                    }
-                }
-            }
-
-            return boxVoxelsEncoding;
-        }
-        public VoxelVolume<VoxelT> ToVolume() {
-            // go through the boxes and 'draw' their value
-            VoxelVolume<VoxelT> voxelVolume = new VoxelVolume<VoxelT>(size);
-            foreach (var box in boxes) {
-                voxelVolume.SetVoxels(box.area, box.value);
-            }
-            return voxelVolume;
-        }
-        public string GetName() => $"BoxVoxelsEncoding<{new VoxelT().GetName()}>";
-        public string GetVersion() => "0.1";
-
-        public IEnumerator GetEnumerator() {
-            throw new System.NotImplementedException();
         }
     }
 }

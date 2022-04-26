@@ -30,6 +30,10 @@ namespace VoxelSystem {
         public BoundsInt GetBounds() => bounds;
 
 
+        public void Init(Vector3Int newSize) {
+            // todo
+        }
+
         /// <summary>
         /// Must NOT be locked. Will delete the entire octree & recreate one.
         /// Destroys all items
@@ -64,6 +68,14 @@ namespace VoxelSystem {
         public VoxelVolume<VoxelT> GetVoxelsInBounds(BoundsInt bounds, int lod) {
             return default;
         }
+
+        public IEnumerator GetEnumerator() {
+            throw new NotImplementedException();
+        }
+        public IEnumerable<FullVoxel> GetFullVoxelEnumerable() {
+            throw new NotImplementedException();
+            // return voxelDict.Select(kvp => new FullVoxel(kvp.Value, kvp.Key));
+        }
         // todo get tree node?
 
         // todo lod stuff
@@ -75,23 +87,23 @@ namespace VoxelSystem {
         // todo
 
         public void SetVoxel(Vector3Int pos, VoxelT newVoxel) {
-            // may need to split node into multiple
-            throw new NotImplementedException();
+            // todo make sure pos is in right space?
+            // todo move to octree base?
+            octree.root.SetValue(pos, newVoxel);
         }
 
         public void SetVoxels(BoundsInt area, Func<Vector3Int, VoxelT, VoxelT> setFunc) {
-            throw new NotImplementedException();
+            octree.SetValues(area, (pos) => setFunc(pos, default));
         }
-
-        public void SetVoxels(Vector3Int startOffset, VoxelVolume<VoxelT> fromVoxels) {
+        public void SetVoxels(Vector3Int startOffset, IVoxelVolume<VoxelT> fromVoxels) {
             throw new NotImplementedException();
         }
         public void SetVoxels(IEnumerable<Vector3Int> positions, VoxelT newVoxel) {
-
+            octree.SetValues(positions, newVoxel);
         }
-        public void FinishUpdating() {
-            // todo dont prune the whole thing, just parts of it?
-            octree.root.Prune();
+        public void FinishUpdating() => FinishUpdating(null);
+        public void FinishUpdating(BoundsInt? area) {
+            octree.FinishUpdating(area);
         }
 
         #endregion
@@ -136,11 +148,6 @@ namespace VoxelSystem {
         void MarkAsDirty() => isDirty = true;
         void ClearDirtyFlag() => isDirty = false;
 
-
-
-        public IEnumerator GetEnumerator() {
-            throw new NotImplementedException();
-        }
 
         #endregion
         // convert to voxel volume

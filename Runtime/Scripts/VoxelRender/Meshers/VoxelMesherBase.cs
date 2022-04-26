@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using Kutil;
 using UnityEngine;
 
@@ -19,9 +20,11 @@ namespace VoxelSystem {
         // protected VoxelChunk chunk;
         // Vector3Int chunkPos;
         // protected VoxelWorld world;
-        protected VoxelRenderer renderer;
         protected float voxelSize;
-        public bool renderNullSides;//? move to mat col?
+
+        protected IEnumerable<VoxelRenderer> renderers;
+        // protected VoxelRenderer renderer => renderers[0];
+        protected IVoxelVolume<IVoxel> voxelVolume;
 
         // protected VoxelTypeHolderSOType<VoxelTypeT> typeHolder;// => world?.materialSet;
 
@@ -44,6 +47,10 @@ namespace VoxelSystem {
         // each mesher will have to have and implementation for both
 
 
+        public virtual void Initialize(IVoxelVolume<IVoxel> voxelVolume, IEnumerable<VoxelRenderer> renderers) {
+            this.voxelVolume = voxelVolume;
+            this.renderers = renderers;
+        }
         // public virtual void Initialize(VoxelChunk chunk, VoxelRenderer renderer, bool renderNullSides=false) {
         //     this.chunk = chunk;
         //     this.world = chunk.world;

@@ -1,6 +1,6 @@
 # Voxel System
 
-goal
+### goal
 create a system that works and use it for a project, expanding on it
 repeat until fully featured?
 later: put on asset store?
@@ -20,7 +20,9 @@ runtime modifiable and destructable
 custom data on any voxel?
 rigidbody physics?
 
-todo next
+## todo
+
+### todo next
 - store data in octtree
 - world spawn chunk
 - mesher create mesh using octtree
@@ -29,7 +31,7 @@ todo next
 - save voxels to file
 - load voxels from file
 
-todo general
+### todo general
 - [ ] publish online
   - [ ] remove dependency on Kutil
   - [ ] paid version?
@@ -128,6 +130,7 @@ old
 https://blog.tedd.no/2018/12/22/building-a-voxel-engine-part-1/
 https://unitycoder.com/blog/2012/10/18/voxel-resources-engines-for-unity/
 
+## Data Storage
 
 voxel storage
 | type | array   | octree      | rle         | boxmodel |
@@ -155,8 +158,11 @@ something like
 
 maybe hash table with vertical rles for changed voxels, and compressed table for unchanged voxels
 
+## logic
 
-## Voxel Plugin notes
+## other voxel system notes
+
+### Voxel Plugin notes
 - voxel plugin unity
 - port to unity
 - have all major features

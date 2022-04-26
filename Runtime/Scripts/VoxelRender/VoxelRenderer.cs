@@ -15,9 +15,9 @@ namespace VoxelSystem {
         VoxelMesherBase voxelMesher;
         [SerializeField, ReadOnly]
         MeshFilter meshFilter;
-        
-        // todo use world octtree
 
+        // todo collision
+        
         // public void Initialize(VoxelChunk chunk) {
         //     this.chunk = chunk;
         //     UpdateMesher();

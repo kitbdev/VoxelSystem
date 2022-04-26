@@ -8,16 +8,25 @@ using System.IO;
 
 namespace VoxelSystem {
     /// <summary>
-    /// Holds voxels in a 3 dimensional volume
+    /// Holds voxels in a 3 dimensional volume. 
+    /// Interface for useful get/set methods.
+    /// Voxel should be a struct
     /// </summary>
-    interface IVoxelVolume<VoxelT> : IEnumerable where VoxelT : struct, IVoxel {
-
+    // dont require struct or new for the interface, allow abstract here, implementations can still enforce it
+    // todo check I hope this doesnt box VoxelT into IVoxel if it is referenced as IVoxelVolume<IVoxel> ...
+    // it shouldnt, in the implementations its required to be a struct
+    // https://stackoverflow.com/questions/25508615/are-value-types-boxed-when-passed-as-generic-parameters-with-an-interface-constr
+    // https://stackoverflow.com/questions/53540884/generics-and-usage-of-interfaces-without-boxing-of-value-instances
+    // looks like it shouldnt be boxed. maybe, the situations are slightly different
+    // todo figure out how to check?
+    public interface IVoxelVolume<VoxelT> : IEnumerable where VoxelT : IVoxel {
 
         Vector3Int Size { get; }
         BoundsInt GetBounds() {
             return new BoundsInt(Vector3Int.zero, Size);
         }
 
+        void Init(Vector3Int newSize);
 
         void ClearAllVoxels();
 
@@ -64,8 +73,10 @@ namespace VoxelSystem {
         }
 
 
-        VoxelVolume<VoxelT> GetAllVoxels() {
-            return GetVoxelsInBounds(GetBounds());
+        IVoxelVolumeT GetAllVoxels<IVoxelVolumeT, IVoxelT>()
+            where IVoxelT : struct, VoxelT
+            where IVoxelVolumeT : IVoxelVolume<IVoxelT>, new() {
+            return GetVoxelsInBounds<IVoxelVolumeT, IVoxelT>(GetBounds());
         }
 
         /// <summary>
@@ -73,26 +84,30 @@ namespace VoxelSystem {
         /// </summary>
         /// <param name="newBounds"></param>
         /// <returns></returns>
-        VoxelVolume<VoxelT> GetVoxelsInBounds(BoundsInt newBounds) {
+        IVoxelVolumeT GetVoxelsInBounds<IVoxelVolumeT, IVoxelT>(BoundsInt newBounds)
+            where IVoxelT : struct, VoxelT
+            where IVoxelVolumeT : IVoxelVolume<IVoxelT>, new() {
             BoundsInt myBounds = GetBounds();
             if (!BoundsIntExt.BoundsIntContains(myBounds, newBounds)) {
                 // if (!bounds.ContainsBounds(newBounds)) {
                 Debug.LogError("Cannot GetVoxels in bounds, new bounds are too large! bounds:" + myBounds + " new:" + newBounds);
                 return default;
             }
-            VoxelVolume<VoxelT> newVol = new VoxelVolume<VoxelT>(newBounds.size);
+            IVoxelVolumeT newVol = new IVoxelVolumeT();
+            newVol.Init(newBounds.size);
             for (int y = newBounds.yMin; y < newBounds.yMax; y++) {
                 for (int z = newBounds.zMin; z < newBounds.zMax; z++) {
                     for (int x = newBounds.xMin; x < newBounds.xMax; x++) {
                         Vector3Int pos = new Vector3Int(x, y, z);
                         // todo may need to offset by myBounds.min ?
                         Vector3Int newPos = pos - newBounds.min;
-                        newVol.SetVoxel(newPos, GetVoxelAt(pos));
+                        newVol.SetVoxel(newPos, (IVoxelT)GetVoxelAt(pos));
                     }
                 }
             }
             return newVol;
         }
+        IEnumerable<FullVoxel> GetFullVoxelEnumerable();
 
         // set
 
@@ -166,7 +181,7 @@ namespace VoxelSystem {
         /// Set voxels in an area using a voxelVolume
         /// </summary>
         /// <param name="startOffset">area to set voxels in. will be clamped to size</param>
-        void SetVoxels(Vector3Int startOffset, VoxelVolume<VoxelT> fromVoxels);
+        void SetVoxels(Vector3Int startOffset, IVoxelVolume<VoxelT> fromVoxels);
 
         /// <summary>
         /// Finish setting voxels for now

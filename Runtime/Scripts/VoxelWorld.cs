@@ -16,6 +16,8 @@ namespace VoxelSystem {
     [DisallowMultipleComponent]
     public class VoxelWorld : MonoBehaviour {
 
+        // settings
+
         [Header("Voxel settings")]
         public float voxelSize = 1;
         public int chunkResolution = 16;
@@ -54,16 +56,18 @@ namespace VoxelSystem {
         public VoxelOctree<VoxelCubic> voxelOctree;
         // public VoxelOctree<IVoxel> voxelOctreei;
         // todo?
-        AllVoxelsHolder holder;
-        class AllVoxelsHolder {
+        public VoxelTypeInterface holder;
+        public class VoxelTypeInterface {
             // interface?
+            IVoxelVolume<IVoxel> volume;
         }
-        class CubicVoxelsHolder : AllVoxelsHolder {
-            public VoxelOctree<VoxelCubic> voxelOctree;
+        public class VoxelTypeInterface<VoxelTypeT, VoxelT> : VoxelTypeInterface
+                                                    where VoxelTypeT : IVoxelType
+                                                    where VoxelT : struct, IVoxel {
+            public VoxelOctree<VoxelT> voxelOctree;
         }
-        class CuboidVoxelsHolder : AllVoxelsHolder {
-            public VoxelOctree<VoxelCuboid> voxelOctree;
-        }
+        public class CubicVoxelsHolder : VoxelTypeInterface<VoxelCubicType, VoxelCubic> { }
+        public class CuboidVoxelsHolder : VoxelTypeInterface<VoxelCuboidType, VoxelCuboid> { }
         // and then user can extend their own holder
         // and I can set holder to whatever class at runtime
         // ? but is an interface to voxel octree good enough?
@@ -78,6 +82,7 @@ namespace VoxelSystem {
         public VoxelTypeId typetest;
 
 
+        [Header("Events")]
         /// <summary>
         /// Called when generating the world, right after it's created.
         /// Use this to add data items, or to do something right after the world is created
@@ -92,6 +97,10 @@ namespace VoxelSystem {
 
         bool isLoaded = false;
         float creationStartTime = 0;
+
+        // all chunks should be children of worlddatago
+        // global runtime logic components can be added to it (like physics? LOD? renderer? idk) 
+        GameObject worldDataGO = null;
 
         private void OnValidate() {
             // Debug.Log("onval vw");
@@ -122,9 +131,7 @@ namespace VoxelSystem {
             // todo compress
         }
 
-        // all chunks should be children of worlddatago
-        // global runtime logic components can be added to it (like physics? LOD? renderer? idk) 
-        GameObject worldDataGO = null;
+        [ContextMenu("Recreate")]
         void RecreateWorld() {
             if (isLoaded) {
                 // if (worldDataGO != null) {
@@ -145,6 +152,7 @@ namespace VoxelSystem {
             // setup world data container GO
             worldDataGO = new GameObject("Voxel World Data");
             worldDataGO.transform.parent = transform;
+            VoxelChunkManager voxelChunkManager = worldDataGO.AddComponent<VoxelChunkManager>();
 
             bool overrideData = true;
             if (overrideData) {

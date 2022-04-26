@@ -117,6 +117,7 @@ namespace VoxelSystem {
             // assumes all resolutions are the same size
             return GetLocalPos(index, resolution, resolution, resolution);
         }
+        public static Vector3Int GetLocalPos(int index, Vector3Int resolution) => GetLocalPos(index, resolution.x, resolution.y, resolution.z);
         public static Vector3Int GetLocalPos(int index, int xResolution, int yResolution, int zResolution) {
             // technically y resolution isnt needed
             Vector3Int pos = Vector3Int.zero;

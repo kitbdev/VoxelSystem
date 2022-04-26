@@ -26,6 +26,7 @@ namespace VoxelSystem {
         public void Init(VoxelTypeIdVoxelData typeId) {
             this.typeId = typeId;
         }
+        public bool IsEmpty() => typeId.Equals(0);
 
         public override bool Equals(object obj) {
             return typeId.Equals(obj);

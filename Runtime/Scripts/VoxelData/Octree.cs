@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -8,24 +10,83 @@ using UnityEngine;
 namespace VoxelSystem {
     [System.Serializable]
     public class Octree<TData> where TData : struct {
+
         public OctreeParent<TData> root;
         public int maxHeight;//?
+
+        public Vector3Int Size => root.GetBounds().size;
+        public BoundsInt GetBounds() => root.GetBounds();
+
         // util stuff?
 
         // todo
-
+        public Octree(int maxHeight) {
+            this.maxHeight = maxHeight;
+            Clear();
+        }
 
         public void Clear() {
             root.Dispose();
             root = new OctreeParent<TData>((byte)maxHeight);
         }
+
+        public void FinishUpdating(BoundsInt? area = null) {
+            // ?
+            // todo dont prune the whole thing, just parts of it?
+            if (area != null) {
+                // get node that encapsulates that area
+                // todo
+                OctreeParent<TData> node = root;
+                // prune just that node
+                node.Prune();
+            } else {
+                root.Prune();
+            }
+        }
+
+        public TData GetValueAt(Vector3Int pos) {
+            return root.GetValue(pos);
+        }
+
+        public bool HasValueAt(Vector3Int pos) {
+            return root.GetBounds().Contains(pos);
+        }
+
+        public void SetValue(Vector3Int pos, TData newValue) {
+            root.SetValue(pos, newValue);
+        }
+        public void SetValues(BoundsInt area, Func<Vector3Int, TData> setFunc) {
+            root.SetValue((bounds) => new OctreeParent<TData>.SetValueBoundsReturnData() {
+                isFullyIn = area.BoundsIntContains(bounds),
+                isPartiallyIn = area.BoundsIntIntersects(bounds),
+                value = setFunc(bounds.position),
+            });
+        }
+        public void SetValues(IEnumerable<Vector3Int> positions, TData newValue) {
+            // todo test
+            root.SetValue((bounds) => {
+                bool allIn = true;
+                foreach (var pos in bounds.allPositionsWithin) {
+                    if (!positions.Contains(pos)) {
+                        allIn = false;
+                        break;
+                    }
+                }
+                return new OctreeParent<TData>.SetValueBoundsReturnData() {
+                    isFullyIn = allIn,
+                    isPartiallyIn = positions.Any(p => bounds.Contains(p)),
+                    value = newValue,
+                };
+            });
+        }
+
     }
     /// <summary>
     /// Either a parent or a leaf for an octree
     /// </summary>
     /// <typeparam name="TData"></typeparam>
     [System.Serializable]
-    public abstract class OctreeNode<TData> : System.IDisposable
+    public abstract class OctreeNode<TData> : System.IDisposable, IEnumerable<OctreeNode<TData>>
     where TData : struct {
 
         public int chunksize;
@@ -50,7 +111,9 @@ namespace VoxelSystem {
         public Vector3Int GetMin() => pos - GetHalfSize() * Vector3Int.one;
         public Vector3Int GetMax() => pos + GetHalfSize() * Vector3Int.one;
         // this is probably correctly setting witht the center
-        public BoundsInt GetBounds() => new BoundsInt(pos, GetSize() * Vector3Int.one);
+        // public BoundsInt GetBounds() => new BoundsInt(pos, GetSize() * Vector3Int.one);
+        // todo boundsint constructor doesnt use center?
+        public BoundsInt GetBounds() => new BoundsInt(GetMin(), GetSize() * Vector3Int.one);
         // public BoundsInt GetBounds() => new BoundsInt().SetMinMax(GetMin(), GetMax());
         public bool IsInOctree(Vector3Int pos) => IsInOctree(pos.x, pos.y, pos.z);
         public bool IsInOctree(int x, int y, int z) {
@@ -110,6 +173,11 @@ namespace VoxelSystem {
         }
 
         public abstract void Dispose();
+        public abstract IEnumerator<OctreeNode<TData>> GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() {
+            // abstract implementation, shouldnt ever be called
+            throw new NotImplementedException();
+        }
     }
     // todo new() instead of struct? would that even help with having an interface?
     // todo maybe pass a delegate constructor instead - Func createFunc<TData>
@@ -149,10 +217,13 @@ namespace VoxelSystem {
         public OctreeParent<TData> Split() {
             return parent.ConvertLeafChildToParent(childIndex);
         }
+        public override IEnumerator<OctreeNode<TData>> GetEnumerator() {
+            yield return this;
+        }
     }
     // public class OctreeParent : OctreeNode, System.Collections.IEnumerable {
     [System.Serializable]
-    public sealed class OctreeParent<TData> : OctreeNode<TData>, System.Collections.IEnumerable
+    public sealed class OctreeParent<TData> : OctreeNode<TData>
         where TData : struct {
 
         // front/back up/down left/right
@@ -259,8 +330,28 @@ namespace VoxelSystem {
             }
             children = null;
         }
-        public IEnumerator GetEnumerator() {
-            return children.GetEnumerator();
+        /// <summary>
+        /// Returns all nodes in breadth first order 
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<OctreeNode<TData>> GetALLChildren() {
+            // this node
+            yield return this;
+            foreach (var c in children) {
+                if (c is OctreeParent<TData> p) {
+                    // recursively get all children
+                    IEnumerable<OctreeNode<TData>> ec = p.GetALLChildren();
+                    foreach (var cc in ec) {
+                        yield return cc;
+                    }
+                } else {
+                    // leaf node
+                    yield return c;
+                }
+            }
+        }
+        public override IEnumerator<OctreeNode<TData>> GetEnumerator() {
+            return GetALLChildren().GetEnumerator();
         }
 
         /// <summary>
@@ -328,7 +419,29 @@ namespace VoxelSystem {
                 children[i].SetAllToValue(value);
             }
         }
-
+        /// <summary>
+        /// Sets all values in set func to a new value. preserves short leaves
+        /// </summary>
+        /// <param name="inSetFunc">in node bounds. returns SetValueBoundsReturnData</param>
+        public struct SetValueBoundsReturnData {
+            /// <summary>Is the bounds to be partially set?</summary>
+            public bool isPartiallyIn;
+            /// <summary>Is the bounds to be fully set?</summary>
+            public bool isFullyIn;
+            /// <summary>The value to set</summary>
+            public TData value;
+        }
+        public void SetValue(System.Func<BoundsInt, SetValueBoundsReturnData> inSetFunc) {
+            foreach (var c in children) {
+                BoundsInt cBounds = c.GetBounds();
+                SetValueBoundsReturnData data = inSetFunc(cBounds);
+                if (data.isFullyIn) {
+                    c.SetAllToValue(data.value);
+                } else if (data.isPartiallyIn && c is OctreeParent<TData> p) {
+                    p.SetValue(inSetFunc);
+                }
+            }
+        }
 
         public OctreeNode<TData> this[int index] => children[index];
     }
