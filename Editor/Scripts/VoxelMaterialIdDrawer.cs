@@ -5,8 +5,8 @@ using Kutil;
 using System.Collections.Generic;
 
 namespace VoxelSystem {
-    [CustomPropertyDrawer(typeof(VoxelTypeId))]
-    public class VoxelTypeIdDrawer : PropertyDrawer {
+    [CustomPropertyDrawer(typeof(VoxelMaterialId))]
+    public class VoxelMaterialIdDrawer : PropertyDrawer {
 
         [SerializeField]
         public bool loadAttempted = false;
@@ -19,7 +19,7 @@ namespace VoxelSystem {
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-            SerializedProperty idProp = property.FindPropertyRelative(nameof(VoxelTypeId.idName));
+            SerializedProperty idProp = property.FindPropertyRelative(nameof(VoxelMaterialId.idName));
             if (property.serializedObject.targetObject is VoxelTypeHolder) {
                 // draw default
                 EditorGUI.PropertyField(position, idProp, label);
@@ -51,8 +51,8 @@ namespace VoxelSystem {
                     // draw dropdown menu for voxel type
 
                     // EditorGUI.LabelField(voxelTypeDropdownRect, "test");
-                    VoxelTypeId selectedId = new VoxelTypeId(idProp.stringValue);
-                    IVoxelType selectedType;
+                    VoxelMaterialId selectedId = new VoxelMaterialId(idProp.stringValue);
+                    IVoxelMaterial selectedType;
                     if (typeHolder.HasVoxelTypeId(selectedId)) {
                         selectedType = typeHolder.GetVoxelType(selectedId);
                     } else {
@@ -67,15 +67,15 @@ namespace VoxelSystem {
                             bool isSet = !selectedId.IsValid();
                             string content = "none";
                             dmenu.AddItem(new GUIContent(content), isSet, SetMenuItemEvent, new SetMenuItemEventData() {
-                                value = VoxelTypeId.EMPTY.idName,
+                                value = VoxelMaterialId.EMPTY.idName,
                                 property = idProp,
                             });
                         }
                         // add all types
-                        IEnumerable<KeyValuePair<VoxelTypeId, IVoxelType>> alltypes = typeHolder.GetAllTypes();
+                        IEnumerable<KeyValuePair<VoxelMaterialId, IVoxelMaterial>> alltypes = typeHolder.GetAllTypes();
                         foreach (var type in alltypes) {
-                            VoxelTypeId optionId = type.Key;
-                            IVoxelType optionType = type.Value;
+                            VoxelMaterialId optionId = type.Key;
+                            IVoxelMaterial optionType = type.Value;
                             bool isSet = selectedId.Equals(optionId);
                             string content = optionType.name;
                             dmenu.AddItem(new GUIContent(content), isSet, SetMenuItemEvent, new SetMenuItemEventData() {

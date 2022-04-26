@@ -22,11 +22,11 @@ namespace VoxelSystem {
     /// Contains all data that Voxel Meshers need to create a mesh for a voxel and render it.
     /// </summary>
     [System.Serializable]
-    public abstract class IVoxelType {
+    public abstract class IVoxelMaterial {
         public string name = "Unknown";
 
-        public abstract IEnumerable<Material> GetAllMats();
-        public abstract IVoxelType GetEmptyType();
-        public abstract IVoxelType GetErrorType();
+        public abstract IEnumerable<Material> GetAllMaterials();
+        public abstract IVoxelMaterial GetEmptyType();
+        public abstract IVoxelMaterial GetErrorType();
     }
 }

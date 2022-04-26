@@ -1,5 +1,5 @@
 
-## logic
+## Voxel System Class Diagram
 ```mermaid
 classDiagram
 direction TB
@@ -38,6 +38,9 @@ class Volume{
 }
 class Renderer{
   <<GO>>
+}
+class MesherBase{
+  <<interface>>
 }
 class Mesher{
   <<Component>>
@@ -84,13 +87,16 @@ class VoxelMaterial{
   uv coords
 }
 
+World --> VoxelSaveData : has
 World --> Generator : ref
 World --> ChunkManager : child
 World --> VoxelMaterialSet : ref
+World --> VoxelTypeData : ?
 
 %% add some indirection with save vs generate?
 ChunkManager ..> Generator  : uses
-ChunkManager --> VoxelSaveData : loads from
+ChunkManager ..> VoxelSaveData : loads from
+ChunkManager ..> VoxelSaveData : saves to
 ChunkManager --o Chunk : manages
 ChunkManager ..o InvokerTracker: tracks
 
@@ -100,6 +106,7 @@ Chunk --> ChunkCollision : manages
 Chunk --o "per layer" Renderer : manages
 Chunk --* Volume : stores
 
+Mesher --|> MesherBase : implements
 Mesher ..> Volume : uses
 Mesher ..> VoxelMaterialSet : uses
 %% should there be one mesher per renderer?

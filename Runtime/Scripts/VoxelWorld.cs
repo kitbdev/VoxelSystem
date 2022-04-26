@@ -61,13 +61,13 @@ namespace VoxelSystem {
             // interface?
             IVoxelVolume<IVoxel> volume;
         }
-        public class VoxelTypeInterface<VoxelTypeT, VoxelT> : VoxelTypeInterface
-                                                    where VoxelTypeT : IVoxelType
+        public class VoxelTypeInterface<VoxelMaterialT, VoxelT> : VoxelTypeInterface
+                                                    where VoxelMaterialT : IVoxelMaterial
                                                     where VoxelT : struct, IVoxel {
             public VoxelOctree<VoxelT> voxelOctree;
         }
-        public class CubicVoxelsHolder : VoxelTypeInterface<VoxelCubicType, VoxelCubic> { }
-        public class CuboidVoxelsHolder : VoxelTypeInterface<VoxelCuboidType, VoxelCuboid> { }
+        public class CubicVoxelsHolder : VoxelTypeInterface<VoxelMaterialCubic, VoxelCubic> { }
+        public class CuboidVoxelsHolder : VoxelTypeInterface<VoxelMaterialCuboid, VoxelCuboid> { }
         // and then user can extend their own holder
         // and I can set holder to whatever class at runtime
         // ? but is an interface to voxel octree good enough?
@@ -77,9 +77,9 @@ namespace VoxelSystem {
             CUBIC, CUBOID, DENSITY, CUSTOM
         }
         public VoxType voxtype;
-        public TypeChoice<IVoxelType> typeToUse;//?
+        public TypeChoice<IVoxelMaterial> typeToUse;//?
 
-        public VoxelTypeId typetest;
+        public VoxelMaterialId typetest;
 
 
         [Header("Events")]

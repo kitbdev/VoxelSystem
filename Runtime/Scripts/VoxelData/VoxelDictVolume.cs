@@ -18,8 +18,14 @@ namespace VoxelSystem {
         SerializableDictionary<Vector3Int, VoxelT> voxelDict = new SerializableDictionary<Vector3Int, VoxelT>();
         Vector3Int maxDimensions;
 
+        static VoxelT emptyVoxel = (new VoxelT());// todo
+
         public Vector3Int Size => maxDimensions;
 
+        // todo store entire bounds
+        public BoundsInt GetBounds() {
+            return new BoundsInt(Vector3Int.zero, Size);
+        }
 
         public void Init(Vector3Int newSize) {
             maxDimensions = newSize;
@@ -34,15 +40,18 @@ namespace VoxelSystem {
         }
 
         public VoxelT GetVoxelAt(Vector3Int pos) {
-            return voxelDict[pos];
+            if (voxelDict.ContainsKey(pos)) {
+                return voxelDict[pos];
+            }
+            return emptyVoxel;
         }
 
         public bool HasVoxelAt(Vector3Int pos) {
-            return voxelDict.ContainsKey(pos);
+            return GetBounds().Contains(pos);
         }
 
         public void SetVoxel(Vector3Int pos, VoxelT newVoxel) {
-            if (!HasVoxelAt(pos)) {
+            if (!voxelDict.ContainsKey(pos)) {
                 if (!newVoxel.IsEmpty()) {
                     voxelDict.Add(pos, newVoxel);
                 }

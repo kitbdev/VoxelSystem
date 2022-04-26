@@ -7,8 +7,8 @@ namespace VoxelSystem {
     public class VoxelTestGenerator : VoxelGenerator {
         
         public float heightLevel;
-        public VoxelTypeId surfaceType;
-        public VoxelTypeId centerType;
+        public VoxelMaterialId surfaceType;
+        public VoxelMaterialId centerType;
 
         public override void Clear() {
             throw new System.NotImplementedException();

@@ -10,19 +10,19 @@ namespace VoxelSystem {
     /// </summary>
     public abstract class VoxelTypeHolder : ScriptableObject {
 
-        public abstract IEnumerable<KeyValuePair<VoxelTypeId, IVoxelType>> GetAllTypes();
-        public abstract bool HasVoxelTypeId(VoxelTypeIdVoxelData id);
-        public abstract bool HasVoxelTypeId(VoxelTypeId id);
-        public abstract bool HasVoxelType(IVoxelType voxelType);
-        public abstract VoxelTypeId GetIdForVoxelType(IVoxelType voxelType);
-        public abstract IVoxelType GetVoxelType(VoxelTypeId id);
-        public abstract IVoxelType GetVoxelType(VoxelTypeIdVoxelData id);
+        public abstract IEnumerable<KeyValuePair<VoxelMaterialId, IVoxelMaterial>> GetAllTypes();
+        public abstract bool HasVoxelTypeId(VoxelMaterialIdVD id);
+        public abstract bool HasVoxelTypeId(VoxelMaterialId id);
+        public abstract bool HasVoxelType(IVoxelMaterial voxelType);
+        public abstract VoxelMaterialId GetIdForVoxelType(IVoxelMaterial voxelType);
+        public abstract IVoxelMaterial GetVoxelType(VoxelMaterialId id);
+        public abstract IVoxelMaterial GetVoxelType(VoxelMaterialIdVD id);
     }
     // ?
     // todo prob just remove type constraint and use actual in meshers
     // or remove specific ones and just use this
     // actually specific ones are just to add the menu
-    public abstract class VoxelTypeHolderSOType<VoxelT> : VoxelTypeHolder where VoxelT : IVoxelType, new() {
+    public abstract class VoxelMaterialHolderSOType<VoxelMaterialT> : VoxelTypeHolder where VoxelMaterialT : IVoxelMaterial, new() {
         // public abstract class VoxelTypeHolderSOType<VoxelT> : ScriptableObject where VoxelT : IVoxelType {
 
         // using a dictionary instead of array because ids may not be contiguous and allows easier updating
@@ -31,10 +31,10 @@ namespace VoxelSystem {
         // [SerializeField]
         // VoxelT[] voxelTypesArray = new VoxelT[0];
 
-        [System.Serializable] class VoxDict : SerializableDictionary<VoxelTypeId, VoxelT> { }
+        [System.Serializable] class VoxDict : SerializableDictionary<VoxelMaterialId, VoxelMaterialT> { }
         [SerializeField]
         VoxDict voxelTypeDict = new VoxDict();
-        IEnumerable<VoxelT> voxelTypes => voxelTypeDict.Values;
+        IEnumerable<VoxelMaterialT> voxelTypes => voxelTypeDict.Values;
 
 
         private void Awake() {
@@ -47,29 +47,29 @@ namespace VoxelSystem {
 
         // general
 
-        public override IEnumerable<KeyValuePair<VoxelTypeId, IVoxelType>> GetAllTypes() {
-            return voxelTypeDict.Select(kvp => new KeyValuePair<VoxelTypeId, IVoxelType>(kvp.Key, kvp.Value)).ToArray();
+        public override IEnumerable<KeyValuePair<VoxelMaterialId, IVoxelMaterial>> GetAllTypes() {
+            return voxelTypeDict.Select(kvp => new KeyValuePair<VoxelMaterialId, IVoxelMaterial>(kvp.Key, kvp.Value)).ToArray();
         }
 
-        public override bool HasVoxelTypeId(VoxelTypeId id) {
+        public override bool HasVoxelTypeId(VoxelMaterialId id) {
             return voxelTypeDict.ContainsKey(id);
         }
-        public override bool HasVoxelType(IVoxelType voxelType) => HasVoxelType(voxelType);
-        public bool HasVoxelType(VoxelT voxelType) {
+        public override bool HasVoxelType(IVoxelMaterial voxelType) => HasVoxelType(voxelType);
+        public bool HasVoxelType(VoxelMaterialT voxelType) {
             return voxelTypeDict.Any(kp => kp.Value == voxelType);
         }
-        public override VoxelTypeId GetIdForVoxelType(IVoxelType voxelType) => GetIdForVoxelType(voxelType);
-        public VoxelTypeId GetIdForVoxelType(VoxelT voxelType) {
+        public override VoxelMaterialId GetIdForVoxelType(IVoxelMaterial voxelType) => GetIdForVoxelType(voxelType);
+        public VoxelMaterialId GetIdForVoxelType(VoxelMaterialT voxelType) {
             if (!HasVoxelType(voxelType)) {
                 Debug.LogWarning($"VoxelTypeId {voxelType} not found!");
-                return VoxelTypeId.INVALID;
+                return VoxelMaterialId.INVALID;
             }
             return voxelTypeDict.First(kp => kp.Value == voxelType).Key;
         }
-        public override IVoxelType GetVoxelType(VoxelTypeId id) {
-            return (IVoxelType)GetVoxelTypeT(id);
+        public override IVoxelMaterial GetVoxelType(VoxelMaterialId id) {
+            return (IVoxelMaterial)GetVoxelTypeT(id);
         }
-        public VoxelT GetVoxelTypeT(VoxelTypeId id) {
+        public VoxelMaterialT GetVoxelTypeT(VoxelMaterialId id) {
             if (!voxelTypeDict.ContainsKey(id)) {
                 Debug.LogWarning($"VoxelTypeId {id} not found!");
                 return null;
@@ -77,11 +77,11 @@ namespace VoxelSystem {
             return voxelTypeDict[id];
         }
 
-        public override bool HasVoxelTypeId(VoxelTypeIdVoxelData id) {
+        public override bool HasVoxelTypeId(VoxelMaterialIdVD id) {
             // todo by index? or store with normal typeid
             return false;
         }
-        public override IVoxelType GetVoxelType(VoxelTypeIdVoxelData voxelType) {
+        public override IVoxelMaterial GetVoxelType(VoxelMaterialIdVD voxelType) {
             if (!HasVoxelTypeId(voxelType)) {
                 Debug.LogWarning($"VoxelTypeIdVD {voxelType} not found!");
                 return null;
@@ -91,7 +91,7 @@ namespace VoxelSystem {
             return null;
         }
 
-        VoxelTypeIdVoxelData UpdateVoxelTypeIdVoxelData(VoxelTypeIdVoxelData id){
+        VoxelMaterialIdVD UpdateVoxelTypeIdVoxelData(VoxelMaterialIdVD id){
             // todo something like this, when changing representation
             // but apply to voxel volumes
             return id;
@@ -103,18 +103,18 @@ namespace VoxelSystem {
             voxelTypeDict.Clear();
             UpdateInspectorRepresentation();
         }
-        public virtual void RemoveVoxelType(VoxelT voxType) {
-            VoxelTypeId voxelTypeId = GetIdForVoxelType(voxType);
+        public virtual void RemoveVoxelType(VoxelMaterialT voxType) {
+            VoxelMaterialId voxelTypeId = GetIdForVoxelType(voxType);
             if (voxelTypeId.IsValid()) {
                 RemoveVoxelType(voxelTypeId);
             }
         }
-        public virtual void RemoveVoxelType(VoxelTypeId id) {
+        public virtual void RemoveVoxelType(VoxelMaterialId id) {
             voxelTypeDict.Remove(id);
             UpdateInspectorRepresentation();
         }
-        public virtual VoxelTypeId AddVoxelType(VoxelT newVoxType) {
-            VoxelTypeId newId = new VoxelTypeId(ToIdName(newVoxType.name));
+        public virtual VoxelMaterialId AddVoxelType(VoxelMaterialT newVoxType) {
+            VoxelMaterialId newId = new VoxelMaterialId(ToIdName(newVoxType.name));
             voxelTypeDict.Add(newId, newVoxType);
             UpdateInspectorRepresentation();
             return newId;
@@ -140,10 +140,10 @@ namespace VoxelSystem {
         // }
 
         private void EnsureEmptyTypeIsAdded() {
-            VoxelTypeId emptyId = VoxelTypeId.EMPTY;
+            VoxelMaterialId emptyId = VoxelMaterialId.EMPTY;
             // note empty type can be changed from default, but it must be at id 0
             if (!voxelTypeDict.ContainsKey(emptyId)) {
-                voxelTypeDict.Add(emptyId, (VoxelT)(new VoxelT()).GetEmptyType());
+                voxelTypeDict.Add(emptyId, (VoxelMaterialT)(new VoxelMaterialT()).GetEmptyType());
                 // todo put at start of dict, somehow
                 //?KeyedCollection ?serializeddict util?
             }
@@ -178,8 +178,8 @@ namespace VoxelSystem {
 
         // for meshers
 
-        public virtual Material[] GetUniqueMaterials(VoxelTypeId[] ids) {
-            return voxelTypes.SelectMany(vct => vct.GetAllMats()).Where(m => m != null).Distinct().ToArray();
+        public virtual Material[] GetUniqueMaterials(VoxelMaterialId[] ids) {
+            return voxelTypes.SelectMany(vct => vct.GetAllMaterials()).Where(m => m != null).Distinct().ToArray();
             // return default;
         }
     }

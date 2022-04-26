@@ -6,7 +6,7 @@ namespace VoxelSystem {
     /// </summary>
     /// [System.Serializable]
     public struct VoxelCuboid : IVoxel {
-        public VoxelTypeIdVoxelData typeId;
+        public VoxelMaterialIdVD typeId;
         // ?
         // public GameObject conencted;// todo also implement idisposable to delete this on destroy?
         //  public VoxelDirFlag facingDir;
@@ -20,10 +20,10 @@ namespace VoxelSystem {
             ZMax = 0x20
         }
 
-        public VoxelCuboid(VoxelTypeIdVoxelData typeId) {
+        public VoxelCuboid(VoxelMaterialIdVD typeId) {
             this.typeId = typeId;
         }
-        public void Init(VoxelTypeIdVoxelData typeId) {
+        public void Init(VoxelMaterialIdVD typeId) {
             this.typeId = typeId;
         }
         public bool IsEmpty() => typeId.Equals(0);

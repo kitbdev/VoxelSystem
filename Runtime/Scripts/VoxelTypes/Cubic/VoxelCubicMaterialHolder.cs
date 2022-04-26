@@ -6,7 +6,7 @@ namespace VoxelSystem {
     /// Holds all VoxelCubicType so they can be easily found, configured, and used by other components
     /// </summary>
     [CreateAssetMenu(fileName = "VoxelCubicTypeHolder", menuName = "VoxelSystem/VoxelCubicTypeHolder", order = 0)]
-    public class VoxelCubicTypeHolder : VoxelTypeHolderSOType<VoxelCubicType> {
+    public class VoxelCubicMaterialHolder : VoxelMaterialHolderSOType<VoxelMaterialCubic> {
         // VoxelCubicType[] voxelCubicTypes;
 
         // protected override VoxelTypeId GetIdForVoxelType(VoxelCubicType voxelType) {

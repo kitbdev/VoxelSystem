@@ -9,7 +9,7 @@ namespace VoxelSystem {
     /// layer, material, collision, etc.
     /// </summary>
     [System.Serializable]
-    public class VoxelCubicType : IVoxelType {
+    public class VoxelMaterialCubic : IVoxelMaterial {
         [Header("General")]
         public bool hasMesh = true;
         public bool onSeperateLayer = false;
@@ -33,10 +33,10 @@ namespace VoxelSystem {
         // public int navMeshWalkable = 0;
 
 
-        public override IEnumerable<Material> GetAllMats() {
+        public override IEnumerable<Material> GetAllMaterials() {
             return new Material[] { mat };
         }
-        public override IVoxelType GetErrorType() => new VoxelCubicType() {
+        public override IVoxelMaterial GetErrorType() => new VoxelMaterialCubic() {
             name = "Error",
             hasMesh = true,
             isTransparent = false,
@@ -45,7 +45,7 @@ namespace VoxelSystem {
             hasCollision = false,
         };
 
-        public override IVoxelType GetEmptyType() => new VoxelCubicType() {
+        public override IVoxelMaterial GetEmptyType() => new VoxelMaterialCubic() {
             name = "Empty",
             hasMesh = false,
             isTransparent = true,
@@ -57,7 +57,7 @@ namespace VoxelSystem {
         // todo transparent logic helper func
     }
     [System.Serializable]
-    public class VoxelCuboidType : IVoxelType {
+    public class VoxelMaterialCuboid : IVoxelMaterial {
         // todo general stuff in base class?
 
         // todo auto set to and from single mat
@@ -90,12 +90,12 @@ namespace VoxelSystem {
         public Vector2Int texcoordLeft;
 
 
-        public override IEnumerable<Material> GetAllMats() {
+        public override IEnumerable<Material> GetAllMaterials() {
             // todo 
             return default;
             // return new Material[] { mat };
         }
-        public override IVoxelType GetErrorType() => new VoxelCubicType() {
+        public override IVoxelMaterial GetErrorType() => new VoxelMaterialCubic() {
             name = "Error",
             hasMesh = true,
             isTransparent = false,
@@ -104,7 +104,7 @@ namespace VoxelSystem {
             hasCollision = false,
         };
 
-        public override IVoxelType GetEmptyType() => new VoxelCubicType() {
+        public override IVoxelMaterial GetEmptyType() => new VoxelMaterialCubic() {
             name = "Empty",
             hasMesh = false,
             isTransparent = true,
@@ -114,15 +114,15 @@ namespace VoxelSystem {
         };
     }
     [System.Serializable]
-    public class VoxelDensityType : IVoxelType {
+    public class VoxelMaterialDensity : IVoxelMaterial {
 
 
-        public override IEnumerable<Material> GetAllMats() {
+        public override IEnumerable<Material> GetAllMaterials() {
             // todo 
             return default;
             // return new Material[] { mat };
         }
-        public override IVoxelType GetErrorType() => new VoxelCubicType() {
+        public override IVoxelMaterial GetErrorType() => new VoxelMaterialCubic() {
             name = "Error",
             hasMesh = true,
             isTransparent = false,
@@ -131,7 +131,7 @@ namespace VoxelSystem {
             hasCollision = false,
         };
 
-        public override IVoxelType GetEmptyType() => new VoxelCubicType() {
+        public override IVoxelMaterial GetEmptyType() => new VoxelMaterialCubic() {
             name = "Empty",
             hasMesh = false,
             isTransparent = true,

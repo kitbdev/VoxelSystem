@@ -7,8 +7,8 @@ namespace VoxelSystem {
     public class VoxelFlatGenerator : VoxelGenerator {
         
         public float heightLevel;
-        public VoxelTypeId surfaceType;
-        public VoxelTypeId underGroundType;
+        public VoxelMaterialId surfaceType;
+        public VoxelMaterialId underGroundType;
 
         public override void Clear() {
             throw new System.NotImplementedException();

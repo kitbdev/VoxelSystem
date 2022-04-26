@@ -44,9 +44,9 @@ namespace VoxelSystem {
 
         public void PopulateWithNewVoxels() {
             // empty is id 0
-            PopulateWithNewVoxels(new VoxelTypeIdVoxelData(0));
+            PopulateWithNewVoxels(new VoxelMaterialIdVD(0));
         }
-        public void PopulateWithNewVoxels(VoxelTypeIdVoxelData typeId) {
+        public void PopulateWithNewVoxels(VoxelMaterialIdVD typeId) {
             voxels = new VoxelT[height][][];
             for (int y = 0; y < size.y; y++) {
                 voxels[y] = new VoxelT[length][];
