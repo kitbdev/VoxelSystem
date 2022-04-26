@@ -1,5 +1,7 @@
 
+using System;
 using System.IO;
+using UnityEngine;
 
 namespace VoxelSystem {
     // todo split editor data class from regular class?
@@ -9,12 +11,31 @@ namespace VoxelSystem {
     /// Refers to a voxel type. better for general uses
     /// </summary>
     [System.Serializable]
-    public class VoxelMaterialId {
+    public class VoxelMaterialId : System.IEquatable<VoxelMaterialId> {
         public string idName;
         // public int id;
-        // VoxelTypeIdVoxelData vtvId;// todo
-        // [SerializeField]
-        public VoxelTypeHolder typeHolder;
+        // todo
+        VoxelMaterialIdVD vmatId => typeHolder.GetVoxMatIdVD(this);
+
+        [SerializeField]
+        private VoxelMaterialHolder _typeHolder;
+        public VoxelMaterialHolder typeHolder {
+            get {
+                if (_typeHolder == null) {
+                    // uhh
+                    _typeHolder = GetDefTypeHolder();
+                }
+                return _typeHolder;
+            }
+            set => _typeHolder = value;
+        }
+        VoxelMaterialHolder GetDefTypeHolder() {
+            // todo not cubic?
+            const string defHolderPath = "Default CubicVoxelTypeHolder";
+            VoxelMaterialHolder voxelTypeHolder = Resources.Load<VoxelMaterialHolder>(defHolderPath);
+            return voxelTypeHolder;
+            // Debug.Log("Loading def type holder " + (voxelTypeHolder == null ? "null" : "found") + " at " + defHolderPath);
+        }
 
         public VoxelMaterialId(string idName) {
             this.idName = idName;
@@ -24,15 +45,18 @@ namespace VoxelSystem {
             return idName != null && idName != "";
         }
 
-        bool Equals(VoxelMaterialId other) {
+        bool EqualsVMID(VoxelMaterialId other) {
             if (!other.IsValid() && !IsValid()) return true;
             if (!other.IsValid() || !IsValid()) return false;
             return idName == other.idName;
         }
+        bool IEquatable<VoxelMaterialId>.Equals(VoxelMaterialId other) {
+            return EqualsVMID(other);
+        }
         public override bool Equals(object obj) {
             if (obj == null) return false;
             if (obj is VoxelMaterialId other) {
-                return Equals(other);
+                return EqualsVMID(other);
             }
             return idName?.Equals(obj) ?? false;
         }
@@ -43,11 +67,11 @@ namespace VoxelSystem {
             return "VTID:" + (idName?.ToString() ?? "?");
         }
 
-        public static bool operator ==(VoxelMaterialId a, VoxelMaterialId b) => a.Equals(b);
+        public static bool operator ==(VoxelMaterialId a, VoxelMaterialId b) => a.EqualsVMID(b);
         public static bool operator !=(VoxelMaterialId a, VoxelMaterialId b) => !(a == b);
 
         // public static implicit operator VoxelTypeId(int id) => new VoxelTypeId(id);
-        // public static implicit operator int(VoxelTypeId vMatId) => vMatId.id;
+        public static implicit operator VoxelMaterialIdVD(VoxelMaterialId vMatId) => vMatId.vmatId;
 
         public static VoxelMaterialId INVALID = new VoxelMaterialId(null);
         public static VoxelMaterialId EMPTY = new VoxelMaterialId("empty");
@@ -103,8 +127,8 @@ namespace VoxelSystem {
         public static bool operator ==(VoxelMaterialIdVD a, VoxelMaterialIdVD b) => a.Equals(b);
         public static bool operator !=(VoxelMaterialIdVD a, VoxelMaterialIdVD b) => !(a == b);
 
-        // public static implicit operator VoxelTypeIdVoxelData(int id) => new VoxelTypeIdVoxelData(id);
-        // public static implicit operator int(VoxelTypeIdVoxelData vMatId) => vMatId.id;
+        public static explicit operator VoxelMaterialIdVD(int id) => new VoxelMaterialIdVD(id);
+        public static explicit operator int(VoxelMaterialIdVD vMatId) => vMatId.id;
 
         public static VoxelMaterialIdVD INVALID = new VoxelMaterialIdVD(-1);
     }

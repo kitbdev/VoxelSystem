@@ -5,21 +5,22 @@ using UnityEngine;
 namespace VoxelSystem {
     [CreateAssetMenu(fileName = "SphereVoxelGenerator", menuName = "VoxelSystem/Generator/Sphere VoxelGenerator", order = 0)]
     public class VoxelSphereGenerator : VoxelGenerator {
-        
+
         public float heightLevel;
         public VoxelMaterialId surfaceType;
         public VoxelMaterialId centerType;
 
+
+        VoxelVolume<VoxelCubic> voxels;
+
+        public override IVoxelVolume<IVoxel> GetVoxels() => (IVoxelVolume<IVoxel>)voxels;
         public override void Clear() {
-            throw new System.NotImplementedException();
+            voxels.ClearAllVoxels();
         }
 
-        public override void Generate() {
-            throw new System.NotImplementedException();
-        }
+        public override void GenerateChunk(Vector3Int chunkPos, Vector3Int chunkSize) {
 
-        public override void GenerateImmediate() {
-            throw new System.NotImplementedException();
+            FinishedGeneration();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace VoxelSystem {
         public bool loadAttempted = false;
         // todo need to store this in editor, persistently
         [SerializeField]
-        public VoxelTypeHolder typeHolder = null;
+        public VoxelMaterialHolder typeHolder = null;
 
         private void OnEnable() {
             // GetDefTypeHolder();
@@ -20,7 +20,7 @@ namespace VoxelSystem {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
             SerializedProperty idProp = property.FindPropertyRelative(nameof(VoxelMaterialId.idName));
-            if (property.serializedObject.targetObject is VoxelTypeHolder) {
+            if (property.serializedObject.targetObject is VoxelMaterialHolder) {
                 // draw default
                 EditorGUI.PropertyField(position, idProp, label);
                 return;
@@ -92,7 +92,7 @@ namespace VoxelSystem {
                 // todo for some reason when this is null, it doesnt show any options
 
                 EditorGUI.BeginChangeCheck();
-                var tHolder = (VoxelTypeHolder)EditorGUI.ObjectField(typeHolderRect, label: GUIContent.none, typeHolder, typeof(VoxelTypeHolder), allowSceneObjects: false);
+                var tHolder = (VoxelMaterialHolder)EditorGUI.ObjectField(typeHolderRect, label: GUIContent.none, typeHolder, typeof(VoxelMaterialHolder), allowSceneObjects: false);
                 if (EditorGUI.EndChangeCheck()) {
                     typeHolder = tHolder;
                 }
@@ -102,9 +102,10 @@ namespace VoxelSystem {
             return base.GetPropertyHeight(property, label);
         }
         public void GetDefTypeHolder() {
+            // todo dup in actual class?
             // todo not cubic?
             const string defHolderPath = "Default CubicVoxelTypeHolder";
-            VoxelTypeHolder voxelTypeHolder = Resources.Load<VoxelTypeHolder>(defHolderPath);
+            VoxelMaterialHolder voxelTypeHolder = Resources.Load<VoxelMaterialHolder>(defHolderPath);
             typeHolder = voxelTypeHolder;
             // Debug.Log("Loading def type holder " + (typeHolder == null ? "null" : "found") + " at " + defHolderPath);
         }

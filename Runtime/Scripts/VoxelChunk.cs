@@ -7,6 +7,20 @@ using UnityEngine;
 namespace VoxelSystem {
     public struct ChunkId {
         public Vector3Int chunkpos;
+
+        // public ChunkId() {}
+        public ChunkId(Vector3Int chunkpos) {
+            this.chunkpos = chunkpos;
+        }
+        public override bool Equals(object obj) {
+            return chunkpos.Equals(obj);
+        }
+        public override int GetHashCode() {
+            return chunkpos.GetHashCode();
+        }
+        public override string ToString() {
+            return "Chunk"+chunkpos.ToString();
+        }
     }
     /// <summary>
     /// stores data for a chunk of voxels.

@@ -30,16 +30,20 @@ namespace VoxelSystem {
         public Vector3Int Size => size;
 
 
+
+
         public VoxelVolume(Vector3Int size) {
             this.size = size;
             _voxels = null;
         }
 
+        public VoxelVolume() { }
+
         // init
-        
-        public void Init(Vector3Int newSize){
+
+        public void Init(Vector3Int newSize) {
             this.size = newSize;
-            _voxels = null;
+            PopulateWithNewVoxels();
         }
 
         public void PopulateWithNewVoxels() {
@@ -68,6 +72,7 @@ namespace VoxelSystem {
             }
             voxels = newVoxels;
         }
+
         public void ClearAllVoxels() {
             this.voxels = null;
         }
@@ -151,13 +156,6 @@ namespace VoxelSystem {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetVoxel(int posx, int posy, int posz, VoxelT newVoxel) {
             voxels[posy][posz][posx] = newVoxel;
-        }
-        /// <summary>
-        /// Set all voxels to a new value
-        /// </summary>
-        /// <param name="setFunc">input pos and original VoxelT, outputs new VoxelT</param>
-        public void SetVoxels(VoxelT newVoxel) {
-            SetVoxels(new BoundsInt(Vector3Int.zero, size), newVoxel);
         }
         /// <summary>
         /// Set voxels in an area using a func

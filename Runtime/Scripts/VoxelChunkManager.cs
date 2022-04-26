@@ -33,10 +33,19 @@ namespace VoxelSystem {
             public float time;
         };
 
+        VoxelWorld world;
+
         List<ChunkTimeData> chunksToRemove;
         List<ChunkTimeData> chunksToAdd;
         Dictionary<ChunkId, VoxelChunk> loadedChunks = new Dictionary<ChunkId, VoxelChunk>();
 
+        private void Awake() {
+            world ??= GetComponentInParent<VoxelWorld>();
+        }
+
+        public void Init(VoxelWorld world) {
+            this.world = world;
+        }
 
         int UpdateChunks(BoundsInt Bounds, List<ChunkId> ChunksToUpdate, System.Action FinishDelegate) {
             // update the mesh
@@ -51,22 +60,32 @@ namespace VoxelSystem {
 
         }
         public void ForceLoadChunk() {
-            // CreateNewChunk();
+            CreateNewChunk(new ChunkId(Vector3Int.zero), 0);
         }
 
         void CreateNewChunk(ChunkId chunkId, byte lod) {
-            GameObject chunkGo = new GameObject("Chunk " + chunkId.chunkpos + " lod:" + lod);
+            string chunkName = $"Chunk {chunkId.chunkpos} lod:{lod}";
+            GameObject chunkGo = new GameObject(chunkName);
+            if (world.debugEnabled) Debug.Log($"Creating chunk {chunkName}", chunkGo);
             chunkGo.transform.SetParent(transform, false);
             // position
             // todo
             chunkGo.transform.localPosition = Vector3.zero;
             chunkGo.transform.localRotation = Quaternion.identity;
 
-
             VoxelChunk chunk = chunkGo.AddComponent<VoxelChunk>();
             chunk.chunkId = chunkId;
 
             loadedChunks.Add(chunkId, chunk);
+
+            // todo load from file option?
+            // todo do in world?
+            // world.generator.onFinishedGeneratingChunkEvent+=
+            FillChunkGen(chunkId);
+        }
+        void FillChunkGen(ChunkId chunkId) {
+            if (world.debugEnabled) Debug.Log($"filling chunk {chunkId}");
+            world.generator.GenerateChunk(chunkId.chunkpos, world.chunkResolution * Vector3Int.one);
         }
 
     }

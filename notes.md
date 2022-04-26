@@ -23,13 +23,13 @@ rigidbody physics?
 ## todo
 
 ### todo next
-- store data in octtree
-- world spawn chunk
 - mesher create mesh using octtree
 - world chunk management better
 - voxel direction?
 - save voxels to file
 - load voxels from file
+
+- use UniTask? https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
 
 ### todo general
 - [ ] publish online

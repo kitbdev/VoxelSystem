@@ -18,17 +18,23 @@ namespace VoxelSystem {
         SerializableDictionary<Vector3Int, VoxelT> voxelDict = new SerializableDictionary<Vector3Int, VoxelT>();
         Vector3Int maxDimensions;
 
-        static VoxelT emptyVoxel = (new VoxelT());// todo
+        /// <summary>
+        /// if the dict doesnt have a value, what should be assumed. Typically, empty or air
+        /// </summary>
+        public VoxelT defaultVoxel;
 
         public Vector3Int Size => maxDimensions;
 
         // todo store entire bounds
+        // BoundsInt bounds;
         public BoundsInt GetBounds() {
             return new BoundsInt(Vector3Int.zero, Size);
         }
 
         public void Init(Vector3Int newSize) {
             maxDimensions = newSize;
+            defaultVoxel = new VoxelT();
+            defaultVoxel.Init((VoxelMaterialIdVD)0);
         }
 
         public void ClearAllVoxels() {
@@ -43,7 +49,7 @@ namespace VoxelSystem {
             if (voxelDict.ContainsKey(pos)) {
                 return voxelDict[pos];
             }
-            return emptyVoxel;
+            return defaultVoxel;
         }
 
         public bool HasVoxelAt(Vector3Int pos) {
@@ -51,12 +57,13 @@ namespace VoxelSystem {
         }
 
         public void SetVoxel(Vector3Int pos, VoxelT newVoxel) {
+            bool isDefaultVoxel = newVoxel.Equals(defaultVoxel);
             if (!voxelDict.ContainsKey(pos)) {
-                if (!newVoxel.IsEmpty()) {
+                if (!isDefaultVoxel) {
                     voxelDict.Add(pos, newVoxel);
                 }
             } else {
-                if (newVoxel.IsEmpty()) {
+                if (isDefaultVoxel) {
                     voxelDict.Remove(pos);
                 } else {
                     voxelDict[pos] = newVoxel;
@@ -73,7 +80,7 @@ namespace VoxelSystem {
 
         public void SetVoxels(Vector3Int startOffset, IVoxelVolume<VoxelT> fromVoxels) {
             foreach (FullVoxel vox in fromVoxels.GetFullVoxelEnumerable()) {
-                if (!vox.voxel.IsEmpty()) {
+                if (!vox.voxel.Equals(defaultVoxel)) {
                     SetVoxel(vox.pos, (VoxelT)vox.voxel);
                 }
             }

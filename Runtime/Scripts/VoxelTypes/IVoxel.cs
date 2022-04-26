@@ -22,8 +22,8 @@ namespace VoxelSystem {
     /// <summary>
     /// Interface for single voxel instance data
     /// </summary>
-    public interface IVoxel : ISaveable {
+    public interface IVoxel : ISaveable, System.IEquatable<IVoxel> {
         void Init(VoxelMaterialIdVD typeId);
-        bool IsEmpty();
+        // IVoxel new(int a);
     }
 }

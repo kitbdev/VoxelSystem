@@ -28,16 +28,6 @@ namespace VoxelSystem {
         }
         public bool IsEmpty() => typeId.Equals(0);
 
-        public override bool Equals(object obj) {
-            return typeId.Equals(obj);
-        }
-        public override int GetHashCode() {
-            return typeId.GetHashCode();
-        }
-        public override string ToString() {
-            return typeId.ToString();
-        }
-
         public string GetName() => "VoxelCuboid";
         public string GetVersion() => "0.1";
 
@@ -48,6 +38,27 @@ namespace VoxelSystem {
 
         public void Load(Stream reader) {
             typeId.Save(reader);
+        }
+
+
+        public bool Equals(IVoxel other) {
+            if (other is VoxelCuboid v) {
+                // todo
+                return typeId.Equals(v.typeId);
+            }
+            return false;
+        }
+        public override bool Equals(object obj) {
+            if (obj is VoxelCuboid v) {
+                return typeId.Equals(v.typeId);
+            }
+            return false;
+        }
+        public override int GetHashCode() {
+            return typeId.GetHashCode();
+        }
+        public override string ToString() {
+            return typeId.ToString();
         }
     }
 }

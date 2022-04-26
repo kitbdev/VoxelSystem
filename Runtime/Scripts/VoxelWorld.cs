@@ -5,10 +5,15 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace VoxelSystem {
+
     /*
     loads from saveobject or generates from generator on enable
     voxels are discarded on disable?
     */
+    public class VoxelSettings {
+
+        public float voxelSize = 1;
+    }
     /// <summary>
     /// Manages a world of Voxels. manages chunks and LOD. stores octree. starts generator. holds many voxel settings
     /// </summary>
@@ -41,7 +46,7 @@ namespace VoxelSystem {
         // todo 
         public Layer layer;
         [Header("Material settings")]
-        public VoxelTypeHolder materialSet;
+        public VoxelMaterialHolder materialSet;
         // [Header("Navmesh settings")]
         [Header("LOD settings")]
         public int maxLOD;
@@ -144,24 +149,32 @@ namespace VoxelSystem {
                 Debug.LogError("Cannot create world, already created", this);
                 return;
             }
-            Debug.Log("Loading World");
+            if (debugEnabled) Debug.Log("Creating Voxel World", this);
 
             isLoaded = false;
             creationStartTime = Time.time;
+
 
             // setup world data container GO
             worldDataGO = new GameObject("Voxel World Data");
             worldDataGO.transform.parent = transform;
             VoxelChunkManager voxelChunkManager = worldDataGO.AddComponent<VoxelChunkManager>();
-
-            bool overrideData = true;
-            if (overrideData) {
-                // use generator
-
+            voxelChunkManager.Init(this);
+            if (generator == null) {
+                Debug.LogWarning("No generator set!", this);
             } else {
+                generator.onFinishedGeneratingChunkEvent += (_) => FinishedGenerationCallback();
+                voxelChunkManager.ForceLoadChunk();
+            }
+
+            bool loadFromFile = false;
+            if (loadFromFile) {
                 // load from save if applicable
                 // todo checks
                 VoxelDataTools.LoadFromSave(this, default);
+            } else {
+                // use generator?
+                // StartGeneration();
             }
             OnGenerateWorldEvent?.Invoke();
             // todo
@@ -175,39 +188,35 @@ namespace VoxelSystem {
                 }
                 worldDataGO = null;
             }
+            isLoaded = false;
+            if (debugEnabled) Debug.Log("Destroyed Voxel World", this);
         }
-
-
 
         void OnWorldLoaded() {
             isLoaded = true;
-            Debug.LogFormat(this, "%s took %fs to generate", name, Time.time - creationStartTime);
+            Debug.LogFormat(this, "{0} took {1:N6}s to load", name, Time.time - creationStartTime);
             // if (bSimulatePhysicsOnceLoaded) {
             //     WorldRoot->BodyInstance.SetInstanceSimulatePhysics(true);
             // }
             OnWorldLoadedEvent?.Invoke();
+            Debug.Log("Loaded Voxel World Successfully", this);
         }
         public void FinishedGenerationCallback() {
             OnWorldLoaded();
         }
 
-        void StartGeneration() {
-            if (generator == null) {
-                return;
-            }
-            generator.Generate();
-        }
-        void StartGenerationImmediate() {
-            if (generator == null) {
-                return;
-            }
-            generator.GenerateImmediate();
-        }
-        void ClearGen() {
-            if (generator == null) {
-                return;
-            }
-            generator.Clear();
-        }
+        // void StartGeneration() {
+        //     if (generator == null) {
+        //         Debug.LogError("Cannot Start, No generator set!");
+        //         return;
+        //     }
+        //     generator.Generate();
+        // }
+        // void ClearGen() {
+        //     if (generator == null) {
+        //         return;
+        //     }
+        //     generator.Clear();
+        // }
     }
 }

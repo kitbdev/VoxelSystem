@@ -22,6 +22,11 @@ namespace VoxelSystem {
             Debug.Break();
 #endif
         }
+        public static void Log(string msg, Object context = null) {
+#if VOXELS_DEBUG
+            Debug.Log(msg, context);
+#endif
+        }
     }
     public static class VoxelTiming {
         // todo 

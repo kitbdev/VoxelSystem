@@ -8,7 +8,7 @@ namespace VoxelSystem {
     /// <summary>
     /// Holds all of a VoxelType so they can be easily found, configured, and used by other components
     /// </summary>
-    public abstract class VoxelTypeHolder : ScriptableObject {
+    public abstract class VoxelMaterialHolder : ScriptableObject {
 
         public abstract IEnumerable<KeyValuePair<VoxelMaterialId, IVoxelMaterial>> GetAllTypes();
         public abstract bool HasVoxelTypeId(VoxelMaterialIdVD id);
@@ -17,12 +17,13 @@ namespace VoxelSystem {
         public abstract VoxelMaterialId GetIdForVoxelType(IVoxelMaterial voxelType);
         public abstract IVoxelMaterial GetVoxelType(VoxelMaterialId id);
         public abstract IVoxelMaterial GetVoxelType(VoxelMaterialIdVD id);
+        public abstract VoxelMaterialIdVD GetVoxMatIdVD(VoxelMaterialId id);
     }
     // ?
-    // todo prob just remove type constraint and use actual in meshers
+    // todo? prob just remove type constraint and use actual in meshers
     // or remove specific ones and just use this
     // actually specific ones are just to add the menu
-    public abstract class VoxelMaterialHolderSOType<VoxelMaterialT> : VoxelTypeHolder where VoxelMaterialT : IVoxelMaterial, new() {
+    public abstract class VoxelMaterialHolderSOType<VoxelMaterialT> : VoxelMaterialHolder where VoxelMaterialT : IVoxelMaterial, new() {
         // public abstract class VoxelTypeHolderSOType<VoxelT> : ScriptableObject where VoxelT : IVoxelType {
 
         // using a dictionary instead of array because ids may not be contiguous and allows easier updating
@@ -91,7 +92,13 @@ namespace VoxelSystem {
             return null;
         }
 
-        VoxelMaterialIdVD UpdateVoxelTypeIdVoxelData(VoxelMaterialIdVD id){
+        public override VoxelMaterialIdVD GetVoxMatIdVD(VoxelMaterialId matId) {
+            // dont use field on property
+            // todo update dict matid then use that one
+            int id = voxelTypeDict.Keys.ToList().FindIndex(key => key.Equals(matId));
+            return new VoxelMaterialIdVD(id);
+        }
+        VoxelMaterialIdVD UpdateVoxelTypeIdVoxelData(VoxelMaterialIdVD id) {
             // todo something like this, when changing representation
             // but apply to voxel volumes
             return id;

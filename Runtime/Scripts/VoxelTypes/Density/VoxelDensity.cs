@@ -16,18 +16,9 @@ namespace VoxelSystem {
         public void Init(VoxelMaterialIdVD typeId) {
             this.typeId = typeId;
         }
-        
+
         public bool IsEmpty() => typeId.Equals(0);
 
-        public override bool Equals(object obj) {
-            return typeId.Equals(obj);
-        }
-        public override int GetHashCode() {
-            return typeId.GetHashCode();
-        }
-        public override string ToString() {
-            return typeId.ToString();
-        }
 
         public string GetName() => "VoxelDensity";
         public string GetVersion() => "0.1";
@@ -42,6 +33,27 @@ namespace VoxelSystem {
             byte[] buffer = new byte[sizeof(float)];
             reader.Read(buffer);
             density = System.BitConverter.ToSingle(buffer);
+        }
+
+
+        public bool Equals(IVoxel other) {
+            if (other is VoxelDensity v) {
+                return typeId.Equals(v.typeId) && density.Equals(v.density);
+            }
+            return false;
+        }
+        public override bool Equals(object obj) {
+            if (obj is VoxelDensity v) {
+                return typeId.Equals(v.typeId) && density.Equals(v.density);;
+            }
+            return false;
+        }
+        public override int GetHashCode() {
+            // todo better hash
+            return typeId.GetHashCode() + 4231 * density.GetHashCode();
+        }
+        public override string ToString() {
+            return typeId.ToString();
         }
     }
 }
