@@ -1,20 +1,21 @@
 
+using System.Collections.Generic;
 using Kutil;
 using UnityEngine;
 
 namespace VoxelSystem {
     /// <summary>
-    /// Renders a chunk of voxels using a voxel mesher and a meshfilter
+    /// Renders mulitple layers of a chunk of voxels using a voxel mesher and meshfilters
     /// </summary>
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class VoxelRenderer : MonoBehaviour {
 
         [SerializeField, ReadOnly]
         VoxelWorld world;
         [SerializeField, SerializeReference, ReadOnly]
         VoxelMesherBase voxelMesher;
-        [SerializeField, ReadOnly]
-        MeshFilter meshFilter;
+
+        // todo manage these
+        List<VoxelMeshRenderer> voxelMeshRenderers = new List<VoxelMeshRenderer>();
 
         // todo collision
         
@@ -42,9 +43,9 @@ namespace VoxelSystem {
         public void UpdateMeshAt(Vector3Int vpos) {
             voxelMesher.UpdateMeshAt(vpos);
         }
-        public Mesh GetMesh() {
-            return meshFilter?.sharedMesh;
-        }
+        // public Mesh GetMeshes() {
+        //     // return meshFilter.Select()?.sharedMesh;
+        // }
         [ContextMenu("UpdateMats")]
         public void UpdateMaterials() {
             MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
@@ -56,11 +57,11 @@ namespace VoxelSystem {
         internal void ApplyMesh() {
             Mesh mesh = voxelMesher.ApplyMesh();
 
-            meshFilter ??= GetComponent<MeshFilter>();
-            if (meshFilter == null) {
-                Debug.LogWarning($"no mesh filter on {name}");
-            }
-            meshFilter.sharedMesh = mesh;
+            // meshFilter ??= GetComponent<MeshFilter>();
+            // if (meshFilter == null) {
+            //     Debug.LogWarning($"no mesh filter on {name}");
+            // }
+            // meshFilter.sharedMesh = mesh;
 #if UNITY_EDITOR
             if (!Application.isPlaying) {
                 // mark scene not saved

@@ -5,9 +5,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-// fixed size generic octree
 
 namespace VoxelSystem {
+    // todo pointerless way?
+    /// <summary>
+    /// fixed size generic octree
+    /// </summary>
+    /// <typeparam name="TData"></typeparam>
     [System.Serializable]
     public class Octree<TData> where TData : struct {
 
